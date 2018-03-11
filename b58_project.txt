@@ -19,8 +19,8 @@ Team Member C
 -------------
 First Name: Abhay
 Last Name: Vaidya
-Student Number:
-UofT E-mail Address:
+Student Number: 1003140889
+UofT E-mail Address: abhay.vaidya@mail.utoronto.ca
 
 Team Member D
 -------------
