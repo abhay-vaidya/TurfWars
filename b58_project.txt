@@ -26,8 +26,8 @@ Team Member D
 -------------
 First Name: Chintan
 Last Name: Shah
-Student Number:
-UofT E-mail Address:
+Student Number: 1002925640
+UofT E-mail Address: chintans.shah@mail.utoronto.ca
 
 Project Details
 ---------------
