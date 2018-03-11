@@ -12,8 +12,8 @@ Team Member B
 -------------
 First Name: Harsh
 Last Name: Patel
-Student Number:
-UofT E-mail Address:
+Student Number: 1003501043
+UofT E-mail Address: harshone.patel@mail.utoronto.ca
 
 Team Member C
 -------------
