@@ -1,4 +1,4 @@
-CSCB58 Project File: Summer 2017
+CSCB58 Project File: Winter 2018
 
 Team Member A
 -------------
@@ -6,6 +6,7 @@ First Name: Rahul
 Last Name: Saini
 Student Number: 1003179767
 UofT E-mail Address: rahul.saini@mail.utoronto.ca
+UTORid: sainira6
 
 
 Team Member B
@@ -14,6 +15,7 @@ First Name: Harsh
 Last Name: Patel
 Student Number: 1003501043
 UofT E-mail Address: harshone.patel@mail.utoronto.ca
+UTORid: patelh87
 
 Team Member C
 -------------
@@ -21,6 +23,8 @@ First Name: Abhay
 Last Name: Vaidya
 Student Number: 1003140889
 UofT E-mail Address: abhay.vaidya@mail.utoronto.ca
+UTORid: vaidyaab
+
 
 Team Member D
 -------------
@@ -28,53 +32,75 @@ First Name: Chintan
 Last Name: Shah
 Student Number: 1002925640
 UofT E-mail Address: chintans.shah@mail.utoronto.ca
+UTORid: shahchi6
+
 
 Project Details
 ---------------
-Project Title: 
+Project Title: DE2 Tron
 
-Project Description:
+Project Description: A variation of the classic Tron game using Verilog and the Altera DE2 board. This is a four-player
+arcade game where players try to cut each other off as they maneuver bikes that leave trails behind them across the screen.
 
-Video URL:
+Video URL :
 
-Code URL (please upload a copy of this file to your repository at the end of the project as well, it will
-serve as a useful resource for future development):
+Code URL :  https://github.com/rahul-kumar-saini/B58-Project
 
 
 Proposal
 --------
 
 What do you plan to have completed by the end of the first lab session?:
+- Keyboard input functionality for the game, preferably at least 'WASD' and the Arrow Keys
+- If that goes well we want to 'TFGH' and 'IJKL' as direction inputs as well
+- Display output of keyboard on DE2 board's HEX displays
+- Create the .mif file for the background for the VGA adapter
 
 What do you plan to have completed by the end of the second lab session?:
+- Implement VGA output using the registers as values for RGB in the grid
+- Implement grid registers and test by assigning values to the registers
+- each cell in our grid will be represented by a 3 bit register, we have as many cells as we want given the screen size
+- 001 : Player 1 trail
+  010 : Player 2 trail
+  011 : Player 3 trail
+  100 : Player 4 trail
+  default : empty cell
+- Pushing '010' to register at (X, Y) should light up that cell with Player 2's colour etc.
 
 What do you plan to have completed by the end of the third lab session?:
+- Implement hit box detection for the player and trails (if a player ends up on a cell that is not default, their game is over)
+- The player's bike acts as a trail cell itself for hit detection purposes and at any time if more than one player attempts to
+  enter the same cell, they all lose
+- The last player still in game wins and the game ends
+- Hitting the edge of the field causes the player to lose
 
-What is your backup plan if things don’t work out as planned?
+What is your backup plan if things don’t work out as planned?:
+- We will have the game working with one player using either the keyboard or the switches and we will have a counter
+to count how many seconds the player lives in the game (essentially will turn into a variation of snake)
 
-What hardware will you need beyond the DE2 board 
-(be sure to e-mail Brian if it’s anything beyond the basics to make sure there’s enough to go around)
+What hardware will you need beyond the DE2 board?:
+We will need the VGA Monitor and a PS/2 Keyboard
+
 
 Motivations
 -----------
 How does this project relate to the material covered in CSCB58?:
+- It will cover material like registers, clock cycles, FSM's, and arithmetic operations from class and allows us to understand it in further detail.
+  This lets us incorporate things we like to allow us to have fun while learning.
 
 Why is this project interesting/cool (for CSCB58 students, and for non CSCB58 students?):
+- It is a take on a classic and highly replayable game that you can play with your friends
+- It showcases a variety of hardware, especially the FPGA boards and its ability to interface with various input
+  and output devices
 
 Why did you personally choose this project?:
+- This game has not been implemented as a B58 or 258 project that we know of and it is a challenging project that will put
+  our skills to the test
 
 Attributions
 ------------
 Provide a complete list of any external resources your project used (attributions should also be included in your
-code).  
+code).
 
 Updates
 -------
-
-<Example update. Delete this and add your own updates after each lab session>
-Week 1: We built the hardware and tested the sensors. The distance sensor we had intended to use didn't work as
-expected (wasn't precise enough at further distances, only seems to work accurately within 5-10cm), so instead
-we've decided to change the project to use a light sensor instead. Had trouble getting the FSM to work (kept
-getting stuck in state 101, took longer to debug than expected), so we may not be able to add the
-high score feature, have updated that in the project description as (optional).
-
