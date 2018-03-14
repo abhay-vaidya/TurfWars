@@ -104,3 +104,6 @@ code).
 
 Updates
 -------
+
+Week 1:
+- Got keyboard functionality working and background finished during the lab
