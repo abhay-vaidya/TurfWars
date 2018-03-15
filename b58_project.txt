@@ -99,11 +99,11 @@ Why did you personally choose this project?:
 
 Attributions
 ------------
-Provide a complete list of any external resources your project used (attributions should also be included in your
-code).
+1. Link: http://www.instructables.com/id/PS2-Keyboard-for-FPGA/
+   Description: Used the Keyboard.v file as a basis for our PS/2 keyboard input, adding additional scan codes for more keys.
 
 Updates
 -------
 
 Week 1:
-- Got keyboard functionality working and background finished during the lab
+- We brought a PS/2 keyboard to lab to begin work on handling input. We found an adapter online for using a PS/2 keyboard with an FPGA board and slightly modified it to test our keyboard works. To test that it works, we binded the up and down arrow keys to a couple of LEDs on the DE2 board, turning the lights on and off with each key press. After a successful test, we added scan codes for the rest of the keys we would be using (WASD, up/down/left/right, YGHJ, PL:") and tested once again by setting a value for each key (0-15) and displaying it to the LEDs.  Then, we used the VGA adapter from Lab 6 to test outputting a sample .mif file. We had some difficulty converting our own bitmaps to .mif, so for testing purposes we used a .mif file from a previous project.
