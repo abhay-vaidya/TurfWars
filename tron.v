@@ -16,8 +16,6 @@ module game(
 
   wire [17:0] p1, p2, p3, p4;
 
-  count <= 2'b00;
-
   keyboard kb(
     .CLOCK_50(CLOCK_50),
     .PS2_KBCLK(PS2_KBCLK),
@@ -48,13 +46,35 @@ module game(
     .newClk(clonke)
     );
 
+  // update the ram
+  ram_update update(
+    .p1(p1),
+    .p2(p2),
+    .p3(p3),
+    .p4(p4),
+    .wren(wren),
+    .address(address),
+    .out(out),
+    .data(data),
+    .clonke(clonke),
+    .halfclk(halfclk)
+    );
+
+  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
+  wire address; // 15 bits, 8 X bits, 7 Y bits
+  wire out; // data in the ram at the given address (3 bits)
+  wire data; // data to be written (3 bits)
+
   ram19200x3 ram(
     .address(address),
-  	.clock(KEY[0]),
-  	.data(SW[3:0]),
-  	.wren(SW[9]),
+  	.clock(CLOCK_50),
+  	.data(data),
+  	.wren(wren),
   	.q(out)
-  );
+    );
+
+  wire halfclk;
+  clk_halfer halfer(CLOCK_50, halfclk);
 
 endmodule
 
@@ -79,6 +99,19 @@ module RateDivider(CLOCK_50, newClk);
 
   assign newClk = (counter == 0) ? 1 : 0; //_____|_____|_____
 
+endmodule
+
+
+module clk_halfer(CLOCK_50, halfclk);
+  input CLOCK_50;
+  output reg halfclk;
+  reg toggle;
+
+  always@(posedge CLOCK_50)
+    begin
+      toggle <= !toggle;
+      halfclk <= toggle;
+    end
 endmodule
 
 
@@ -132,9 +165,8 @@ module mechanics(CLOCK_50, key_in, player1, player2, player3, player4);
 endmodule
 
 
-module move(CLOCK_50, clonke, p1, p2, p3, p4, ram_in_use);
+module move(CLOCK_50, clonke, p1, p2, p3, p4);
 
-  output reg ram_in_use = 1'b0;
   input clonke, CLOCK_50;
   input [17:0] p1, p2, p3, p4;
 
@@ -172,15 +204,71 @@ module move(CLOCK_50, clonke, p1, p2, p3, p4, ram_in_use);
           2'b11: p4[14:7] <= p4[14:7] + 1'b1;
         endcase
     end
-    reg [3:0] ram_fsm, ram_next;
-    localparam  sleep = 4'd0,
-                ram_p1 = 4'd1,
-                ram_p2 = 4'd2,
-                ram_p3 = 4'd3,
-                ram_p4 = 4'd4;
-    always@(*)
+
+endmodule
+
+
+module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk);
+
+  input clonke, halfclk;
+  input [17:0] p1, p2, p3, p4;
+
+  output wren;
+  output [15:0] address;
+  output [2:0] out;
+  output [2:0] data;
+
+  reg [5:0] ram_fsm;
+
+  localparam  sleep = 6'd0,
+              read_p1 = 6'd1;
+              read_p2 = 6'd2;
+              read_p3 = 6'd3;
+              read_p4 = 6'd4;
+              write_p1 = 6'd5,
+              write_p2 = 6'd6,
+              write_p3 = 6'd7,
+              write_p4 = 6'd8;
+
+  always@(posedge halfclk)
+    begin
       case(ram_fsm)
-        sleep: ram_next <= clonke;
+        sleep: ram_fsm = clonke ? read_p1 : sleep;
+        read_p1: ram_fsm = read_p2;
+        read_p2: ram_fsm = read_p3;
+        read_p3: ram_fsm = read_p4;
+        read_p4: ram_fsm = write_p1;
+        write_p1: ram_fsm = write_p2;
+        write_p2: ram_fsm = write_p3;
+        write_p3: ram_fsm = write_p4;
+        write_p4: ram_fsm = sleep;
+        default: ram_fsm = sleep;
+      endcase
+    end
+
+    always@(negedge halfclk)
+      begin
+        case(ram_fsm)
+
+        read_p1: // read location value of player 1
+
+        read_p2: // read location of value of player 2
+
+        read_p3: // read location of value of player 3
+
+        read_p4: // read location of value of player 4
+
+        write_p1: // write to location, if not dead
+
+        write_p2: // write to location, if not dead
+
+        write_p3: // write to location, if not dead
+
+        write_p4: // write to location, if not dead
+
+      end
+
+
 endmodule
 
 
