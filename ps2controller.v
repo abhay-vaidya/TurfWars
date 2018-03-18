@@ -21,16 +21,16 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-module Keyboard(
-	input CLOCK_50,	//board clock
-   input PS2_KBCLK,	//keyboard clock and data signals
-   input PS2_KBDAT,
+module keyboard(
+    input CLOCK_50,	//board clock
+    input PS2_KBCLK,	//keyboard clock and data signals
+    input PS2_KBDAT,
 //	output reg scan_err,			//These can be used if the Keyboard module is used within a another module
 //	output reg [10:0] scan_code,
 //	output reg [3:0]COUNT,
 //	output reg TRIG_ARR,
 //	output reg [7:0]CODEWORD,
-   output reg [5:0] KEY_PRESSED	//8 LEDs
+    output reg [5:0] KEY_PRESSED	//8 LEDs
    );
 
 	wire [7:0] ARROW_UP = 8'h75;	//codes for arrows
