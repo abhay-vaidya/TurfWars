@@ -22,8 +22,15 @@ module display(
     VGA_SYNC_N,    //    VGA SYNC
     VGA_R,         //    VGA Red[9:0]
     VGA_G,         //    VGA Green[9:0]
-    VGA_B          //    VGA Blue[9:0]
+    VGA_B,          //    VGA Blue[9:0]
+
+    p1,
+    p2,
+    p3,
+    p4
     );
+
+    input [17:0] p1, p2, p3, p4;
 
     input clonke;
     input           CLOCK_50;    //    50 MHz
@@ -69,7 +76,7 @@ module display(
             .VGA_BLANK(VGA_BLANK_N),
             .VGA_SYNC(VGA_SYNC_N),
             .VGA_CLK(VGA_CLK));
-        defparam VGA.RESOLUTION = "320x240";
+        defparam VGA.RESOLUTION = "160x240";
         defparam VGA.MONOCHROME = "FALSE";
         defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
         defparam VGA.BACKGROUND_IMAGE = "black.mif";
@@ -108,7 +115,7 @@ module display(
     // Instansiate FSM control
     // control c0(...);
     control c0(
-        .clk(CLOCK_50),
+        .clk(CLOCK_50),3
         .clnk(clonke),
         .resetn(resetn),
         .get_input(get_input),
@@ -239,8 +246,7 @@ module control(
 
     /* finite states */
     localparam  S_LOAD_X_WAIT       = 5'd0,
-                S_LOAD_X            = 5'd1,|_____|_____|_____
-
+                S_LOAD_X            = 5'd1,
                 S_LOAD_Y_WAIT       = 5'd2,
                 S_LOAD_Y            = 5'd3,
                 S_DRAW_WAIT         = 5'd4,

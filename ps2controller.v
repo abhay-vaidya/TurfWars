@@ -30,7 +30,7 @@ module keyboard(
 //	output reg [3:0]COUNT,
 //	output reg TRIG_ARR,
 //	output reg [7:0]CODEWORD,
-    output reg [5:0] KEY_PRESSED	//8 LEDs
+    output reg [4:0] KEY_PRESSED	//8 LEDs
    );
 
 	wire [7:0] ARROW_UP = 8'h75;	//codes for arrows
@@ -161,25 +161,25 @@ module keyboard(
 			KEY_PRESSED <= 5'd3;
 		else if (CODEWORD == W)
 			KEY_PRESSED <= 5'd4;
-		else if (CODEWORD == A)
-			KEY_PRESSED <= 5'd5;
 		else if (CODEWORD == S)
+			KEY_PRESSED <= 5'd5;
+		else if (CODEWORD == A)
 			KEY_PRESSED <= 5'd6;
 		else if (CODEWORD == D)
 			KEY_PRESSED <= 5'd7;
 		else if (CODEWORD == Y)
 			KEY_PRESSED <= 5'd8;
-		else if (CODEWORD == G)
-			KEY_PRESSED <= 5'd9;
 		else if (CODEWORD == H)
+			KEY_PRESSED <= 5'd9;
+		else if (CODEWORD == G)
 			KEY_PRESSED <= 5'd10;
 		else if (CODEWORD == J)
 			KEY_PRESSED <= 5'd11;
 		else if (CODEWORD == P)
 			KEY_PRESSED <= 5'd12;
-		else if (CODEWORD == L)
-			KEY_PRESSED <= 5'd13;
 		else if (CODEWORD == COLON)
+			KEY_PRESSED <= 5'd13;
+		else if (CODEWORD == L)
 			KEY_PRESSED <= 5'd14;
 		else if (CODEWORD == QUOTES)
 			KEY_PRESSED <= 5'd15;
