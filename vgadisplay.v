@@ -76,7 +76,7 @@ module display(
             .VGA_BLANK(VGA_BLANK_N),
             .VGA_SYNC(VGA_SYNC_N),
             .VGA_CLK(VGA_CLK));
-        defparam VGA.RESOLUTION = "160x240";
+        defparam VGA.RESOLUTION = "160x120";
         defparam VGA.MONOCHROME = "FALSE";
         defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
         defparam VGA.BACKGROUND_IMAGE = "black.mif";
