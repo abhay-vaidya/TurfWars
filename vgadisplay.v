@@ -115,7 +115,7 @@ module display(
     // Instansiate FSM control
     // control c0(...);
     control c0(
-        .clk(CLOCK_50),3
+        .clk(CLOCK_50),
         .clnk(clonke),
         .resetn(resetn),
         .get_input(get_input),
