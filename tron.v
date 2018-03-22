@@ -10,8 +10,15 @@ module DE2Tron(
   input PS2_KBCLK,
   input PS2_KBDAT,
   input KEY,
-  input SW
-
+  input SW,
+  output VGA_CLK,
+  output VGA_HS,
+  output VGA_VS,
+  output VGA_BLANK_N,
+  output VGA_SYNC_N,
+  output [9:0] VGA_R,
+  output [9:0] VGA_G,
+  output [9:0] VGA_B
   );
 
   wire [4:0] KEY_PRESSED; // pass into mechanics
@@ -20,7 +27,7 @@ module DE2Tron(
   wire [17:0] p1, p2, p3, p4;
 
   wire [17:0] p1_move, p2_move, p3_move, p4_move;
-  
+
   wire wren_ram;
   wire [17:0] p1ram, p2ram, p3ram, p4ram;
 
@@ -63,7 +70,7 @@ module DE2Tron(
 	 .CLOCK_50(CLOCK_50),
 	 .clonke(clonke)
 	 );
-	 
+
   display dp(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
@@ -73,14 +80,22 @@ module DE2Tron(
     .p4(p4),
 	 .start(start),
 	 .KEY(KEY),
-	 .SW(SW)
+	 .SW(SW),
+   .VGA_CLK(VGA_CLK),
+   .VGA_HS(VGA_HS),
+   .VGA_VS(VGA_VS),
+   .VGA_BLANK_N(VGA_BLANK_N),
+   .VGA_SYNC_N(VGA_SYNC_N),
+   .VGA_R(VGA_R),
+   .VGA_G(VGA_G),
+   .VGA_B(VGA_B)
     );
 
   RateDivider divider(
     .CLOCK_50(CLOCK_50),
     .newClk(clonke)
     );
-	 
+
 	wire start;
 
   // update the ram
@@ -170,7 +185,7 @@ module mechanics(CLOCK_50, key_in, player1, player2, player3, player4, p1ram, p2
 
   reg reset = 1'b0;
   output reg [17:0] player1, player2, player3, player4;
-  
+
   initial begin
   player1 = 18'b100111111111111111; // start bottom right, move up
   player2 = 18'b101000000000000000; // start top left, move down
@@ -192,7 +207,7 @@ module mechanics(CLOCK_50, key_in, player1, player2, player3, player4, p1ram, p2
 				player2[14:0] <= p2move[14:0];
 				player3[14:0] <= p3move[14:0];
 				player4[14:0] <= p4move[14:0];
-				
+
 				player1[17] <= p1move[17];
 				player2[17] <= p2move[17];
 				player3[17] <= p3move[17];
@@ -204,16 +219,16 @@ module mechanics(CLOCK_50, key_in, player1, player2, player3, player4, p1ram, p2
 				player2[14:0] <= p2ram[14:0];
 				player3[14:0] <= p3ram[14:0];
 				player4[14:0] <= p4ram[14:0];
-				
+
 				player1[17] <= p1ram[17];
 				player2[17] <= p2ram[17];
 				player3[17] <= p3ram[17];
 				player4[17] <= p4ram[17];
 			end
 	end
-  
-  
-  
+
+
+
   // Changing directions for players
   always@(posedge CLOCK_50)
     begin
@@ -252,7 +267,7 @@ module move(CLOCK_50, clonke, p1, p2, p3, p4, p1out, p2out, p3out, p4out);
   input [17:0] p1, p2, p3, p4;
 
   output reg [17:0] p1out, p2out, p3out, p4out;
-    
+
   initial
 	begin
 		p1out = p1;
@@ -260,7 +275,7 @@ module move(CLOCK_50, clonke, p1, p2, p3, p4, p1out, p2out, p3out, p4out);
 		p3out = p3;
 		p4out = p4;
 	end
-  
+
   always@(posedge clonke)
     begin // assuming 0,0 top left (Y inverted)
       if (p1[17])
@@ -352,14 +367,14 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
         default: ram_fsm = sleep;
       endcase
     end
-	 
-	 reg [17:0] p1_curr, p2_curr, p3_curr, p4_curr; 
+
+	 reg [17:0] p1_curr, p2_curr, p3_curr, p4_curr;
 
     always@(negedge halfclk)
       begin
         case(ram_fsm)
-		  
-		  sleep: 
+
+		  sleep:
 		  begin
 		  wren_ram <= 0;
 		  start_drawing <= 0;
@@ -392,7 +407,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 				p4_curr[17:3] <= p4[14:0];
 				p4_curr[2:0] <= out[2:0];
 			end
-			
+
         write_p1: // write to location, if not dead
 			begin
 				wren_ram <= 1;
@@ -408,7 +423,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 								end
 							else // player lives
 								begin
-									wren <= 1; 
+									wren <= 1;
 									address[14:0] <= p1_curr[17:3]; 	// address for ram
 									data <= 3'b001;						// p1 color to ram at the address
 								end
@@ -421,7 +436,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 							end
 					endcase
 			end
-			
+
         write_p2: // write to location, if not dead
 			begin
 				wren_ram <= 1;
@@ -450,7 +465,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 							end
 					endcase
 			end
-		  
+
         write_p3: // write to location, if not dead
 			begin
 				wren_ram <= 1;
@@ -479,7 +494,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 							end
 					endcase
 			end
-		  
+
         write_p4: // write to location, if not dead
 			begin
 				wren_ram <= 1;
