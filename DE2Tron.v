@@ -3,13 +3,12 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
-`include "tron.v"
+`include "game.v"
 `include "ps2controller.v"
 
 
-module display(
+module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
-    clonke,
     PS2_KBCLK,
     PS2_KBDAT,
     // Your inputs and outputs here
@@ -81,16 +80,21 @@ module display(
     reg [6:0] x_in, y_in;
 
     wire start_drawing = KEY[1];
-    wire [6:0] coordinate_input;
-    assign coordinate_input = SW[6:0];
-    wire get_input;
-    assign get_input = KEY[3];
+    reg [14:0] coordinate_input;
+    //assign coordinate_input = 15'b001101110010111;//p1[14:0];
+	 initial begin
+	 coordinate_input = 15'b001101110010111;
+	 end
+	 always@(posedge clonke)
+	 begin
+	 coordinate_input <= coordinate_input + 1'b1;
+	 end
 
-    assign colour = SW[9:7];
+    assign colour = 3'b001;
 
     wire resetting;
 
-    wire ld_x, ld_y, ld_draw;
+    wire ld_x, ld_y, ld_draw, ld_pos;
 
     // datapath d0(...);
     datapath d0(
@@ -100,6 +104,7 @@ module display(
         .ld_x(ld_x),
         .ld_y(ld_y),
         .ld_draw(ld_draw),
+		  .ld_pos(ld_pos),
         .x(x),
         .y(y),
         .drawing(writeEn),
@@ -112,12 +117,12 @@ module display(
         .clk(CLOCK_50),
         .clnk(clonke),
         .resetn(resetn),
-        .get_input(get_input),
         .drawing(writeEn),
         .ld_x(ld_x),
         .ld_y(ld_y),
+		  .ld_pos(ld_pos),
         .ld_draw(ld_draw),
-        .start_drawing(start_drawing),
+        .start_drawing(start),
         .resetting(resetting)
         );
 
@@ -131,10 +136,12 @@ module display(
 
     wire [4:0] KEY_PRESSED;
     wire start;
+	 wire clonke;
     wire [17:0] p1, p2, p3, p4;
 
     game g(
       .CLOCK_50(CLOCK_50),
+		.clonke(clonke),
       .KEY_PRESSED(KEY_PRESSED),
       .start(start),
       .p1(p1),
@@ -152,6 +159,7 @@ module datapath(
         data_in,
         ld_x,
         ld_y,
+		  ld_pos,
         ld_draw,
         x, y,
         drawing,
@@ -161,8 +169,8 @@ module datapath(
     // Inputs
     input clk;                  // Clock
     input resetn;               // Reset button
-    input [6:0] data_in;        // Data to be loaded. SW[7:0]
-    input ld_x, ld_y, ld_draw;  // load x, load y, start draw
+    input [14:0] data_in;        // Data to be loaded. SW[7:0]
+    input ld_x, ld_y, ld_draw, ld_pos;  // load x, load y, start draw
     // Outputs
     output reg [7:0] x;         // X reg to store value
     output reg [6:0] y;         // Y reg to store value
@@ -225,11 +233,18 @@ module datapath(
                 /* otherwise, check if we are loading x or y value, or drawing */
                 else begin
                     /* load x */
+						  /*
                     if (ld_x)
                         x_reg <= { 1'b0, data_in };
-                    /* load y */
+                    /* load y 
                     if (ld_y)
                         y_reg <= data_in;
+							*/
+						  if (ld_pos)
+							begin
+								x_reg <= data_in[14:7];
+								y_reg <= data_in[6:0];
+							end
                     if (ld_draw)
                         drawing <= 1'b1;
                 end
@@ -247,7 +262,7 @@ module control(
         start_drawing,
         drawing,
         resetting,
-        ld_x, ld_y, ld_draw
+        ld_x, ld_y, ld_draw, ld_pos
     );
 
     input clk, clnk;
@@ -257,42 +272,32 @@ module control(
     input drawing;
     input resetting;
 
-    output reg ld_x, ld_y, ld_draw;
+    output reg ld_x, ld_y, ld_draw, ld_pos;
 
     reg [5:0] current_state, next_state;
 
     /* finite states */
-    localparam  S_LOAD_X_WAIT       = 5'd0,
-                S_LOAD_X            = 5'd1,
-                S_LOAD_Y_WAIT       = 5'd2,
-                S_LOAD_Y            = 5'd3,
-                S_DRAW_WAIT         = 5'd4,
-                S_DRAWING           = 5'd5,
-                S_DONE_DRAWING      = 5'd6,
-                S_RESET             = 5'd6;
+    localparam  S_LOAD_POS       = 5'd0,
+                S_DRAW_WAIT         = 5'd1,
+                S_DRAWING           = 5'd2,
+                S_DONE_DRAWING      = 5'd3,
+                S_RESET             = 5'd4;
 
 
     // Next state logic aka our state table
     always @(*)
     begin: state_table
     case (current_state)
-        /* waiting for X input                   not pressed     pressed */
-        S_LOAD_X_WAIT:  next_state = get_input ? S_LOAD_X_WAIT : S_LOAD_X;
         /* get X input */
-        S_LOAD_X:       next_state = get_input ? S_LOAD_Y_WAIT : S_LOAD_X;
-        /* waiting for Y input */
-        S_LOAD_Y_WAIT:  next_state = get_input ? S_LOAD_Y_WAIT : S_LOAD_Y;
-        /* get Y input */
-        S_LOAD_Y:       next_state = get_input ? S_DRAW_WAIT : S_LOAD_Y;
-        /* wait for drawing input */
+        S_LOAD_POS:       next_state = S_DRAW_WAIT;
         S_DRAW_WAIT:    next_state = start_drawing ? S_DRAW_WAIT : S_DRAWING;
         /* start drawing                       1           0             */
         S_DRAWING:      next_state = drawing ? S_DRAWING : S_DONE_DRAWING;
         /* done drawing              go to wait for X input */
-        S_DONE_DRAWING: next_state = S_LOAD_X_WAIT;
+        S_DONE_DRAWING: next_state = S_LOAD_POS;
         /* resetting state                       1         0             */
-        S_RESET:        next_state = resetting ? S_RESET : S_LOAD_X_WAIT;
-        default:        next_state = S_LOAD_X_WAIT;
+        S_RESET:        next_state = resetting ? S_RESET : S_LOAD_POS;
+        default:        next_state = S_LOAD_POS;
     endcase
     end    // state_table
 
@@ -300,16 +305,11 @@ module control(
     always @(*)
     begin: enable_signals
         // By default make all our signals 0
-        ld_x = 1'b0;
-        ld_y = 1'b0;
+        ld_pos = 1'b0;
         case (current_state)
             /* in LOAD_X state, load x value to reg by setting ld_x to 1 */
-            S_LOAD_X: begin
-                ld_x = 1'b1;
-            end
-            /* in LOAD_Y state, load y value to reg by setting ld_y to 1 */
-            S_LOAD_Y: begin
-                ld_y = 1'b1;
+            S_LOAD_POS: begin
+                ld_pos = 1'b1;
             end
             /* in DRAWING state, begin to draw to screen by setting ld_draw to 1 */
             S_DRAWING: begin

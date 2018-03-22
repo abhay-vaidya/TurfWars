@@ -2,7 +2,7 @@
 `include "ram19200x3.v"
 
 module game(
-  CLOCK_50,
+  CLOCK_50, clonke,
   KEY_PRESSED,
   start,
   p1,
@@ -13,11 +13,11 @@ module game(
 
   input [4:0] KEY_PRESSED;
   input CLOCK_50;
-  output reg start;
+  output wire start;
 
-  output reg [17:0] p1, p2, p3, p4;
+  output wire [17:0] p1, p2, p3, p4;
 
-  wire clonke; // posedge 4 times a second
+  output wire clonke; // posedge 4 times a second
 
   //wire [17:0] p1, p2, p3, p4;
 
@@ -360,7 +360,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 				p2_curr[2:0] <= out[2:0];
 			end
         read_p3: // read location of value of player 3
-			begin
+			begin	
 				wren <= 0;
 				address[14:0] <= p3[14:0];
 				p3_curr[17:3] <= p3[14:0];
