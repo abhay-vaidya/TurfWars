@@ -3,14 +3,16 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
+`include "tron.v"
+`include "ps2controller.v"
 
 
 module display(
     CLOCK_50,    // On Board 50 MHz
     clonke,
-
+    PS2_KBCLK,
+    PS2_KBDAT,
     // Your inputs and outputs here
-
     KEY,
     SW,
 
@@ -22,18 +24,9 @@ module display(
     VGA_SYNC_N,    //    VGA SYNC
     VGA_R,         //    VGA Red[9:0]
     VGA_G,         //    VGA Green[9:0]
-    VGA_B,          //    VGA Blue[9:0]
-
-    p1,
-    p2,
-    p3,
-    p4,
-	 start
+    VGA_B         //    VGA Blue[9:0]
     );
-	 input start;
-    input [17:0] p1, p2, p3, p4;
-
-    input clonke;
+    input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
     input   [9:0]   SW;
     input   [3:0]   KEY;
@@ -127,6 +120,29 @@ module display(
         .start_drawing(start_drawing),
         .resetting(resetting)
         );
+
+
+    keyboard kb(
+      .CLOCK_50(CLOCK_50),
+      .PS2_KBCLK(PS2_KBCLK),
+      .PS2_KBDAT(PS2_KBDAT),
+      .KEY_PRESSED(KEY_PRESSED)
+      );
+
+    wire [4:0] KEY_PRESSED;
+    wire start;
+    wire [17:0] p1, p2, p3, p4;
+
+    game g(
+      .CLOCK_50(CLOCK_50),
+      .KEY_PRESSED(KEY_PRESSED),
+      .start(start),
+      .p1(p1),
+      .p2(p2),
+      .p3(p3),
+      .p4(p4)
+      );
+
 endmodule
 
 

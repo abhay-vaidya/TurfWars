@@ -1,42 +1,30 @@
 
-`include "ps2controller.v"
-`include "vgadisplay.v"
 `include "ram19200x3.v"
 
-module DE2Tron(
-
-  input CLOCK_50,
-
-  input PS2_KBCLK,
-  input PS2_KBDAT,
-  input KEY,
-  input SW,
-  output VGA_CLK,
-  output VGA_HS,
-  output VGA_VS,
-  output VGA_BLANK_N,
-  output VGA_SYNC_N,
-  output [9:0] VGA_R,
-  output [9:0] VGA_G,
-  output [9:0] VGA_B
+module game(
+  CLOCK_50,
+  KEY_PRESSED,
+  start,
+  p1,
+  p2,
+  p3,
+  p4
   );
 
-  wire [4:0] KEY_PRESSED; // pass into mechanics
+  input [4:0] KEY_PRESSED;
+  input CLOCK_50;
+  output reg start;
+
+  output reg [17:0] p1, p2, p3, p4;
+
   wire clonke; // posedge 4 times a second
 
-  wire [17:0] p1, p2, p3, p4;
+  //wire [17:0] p1, p2, p3, p4;
 
   wire [17:0] p1_move, p2_move, p3_move, p4_move;
 
   wire wren_ram;
   wire [17:0] p1ram, p2ram, p3ram, p4ram;
-
-  keyboard kb(
-    .CLOCK_50(CLOCK_50),
-    .PS2_KBCLK(PS2_KBCLK),
-    .PS2_KBDAT(PS2_KBDAT),
-    .KEY_PRESSED(KEY_PRESSED)
-    );
 
   mechanics mech(
     .CLOCK_50(CLOCK_50),
@@ -71,32 +59,10 @@ module DE2Tron(
 	 .clonke(clonke)
 	 );
 
-  display dp(
-    .CLOCK_50(CLOCK_50),
-    .clonke(clonke),
-    .p1(p1),
-    .p2(p2),
-    .p3(p3),
-    .p4(p4),
-	 .start(start),
-	 .KEY(KEY),
-	 .SW(SW),
-   .VGA_CLK(VGA_CLK),
-   .VGA_HS(VGA_HS),
-   .VGA_VS(VGA_VS),
-   .VGA_BLANK_N(VGA_BLANK_N),
-   .VGA_SYNC_N(VGA_SYNC_N),
-   .VGA_R(VGA_R),
-   .VGA_G(VGA_G),
-   .VGA_B(VGA_B)
-    );
-
   RateDivider divider(
     .CLOCK_50(CLOCK_50),
     .newClk(clonke)
     );
-
-	wire start;
 
   // update the ram
   ram_update update(
