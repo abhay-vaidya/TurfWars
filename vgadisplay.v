@@ -27,9 +27,10 @@ module display(
     p1,
     p2,
     p3,
-    p4
+    p4,
+	 start
     );
-
+	 input start;
     input [17:0] p1, p2, p3, p4;
 
     input clonke;

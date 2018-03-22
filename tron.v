@@ -8,7 +8,9 @@ module DE2Tron(
   input CLOCK_50,
 
   input PS2_KBCLK,
-  input PS2_KBDAT
+  input PS2_KBDAT,
+  input KEY,
+  input SW
 
   );
 
@@ -68,13 +70,18 @@ module DE2Tron(
     .p1(p1),
     .p2(p2),
     .p3(p3),
-    .p4(p4)
+    .p4(p4),
+	 .start(start),
+	 .KEY(KEY),
+	 .SW(SW)
     );
 
   RateDivider divider(
     .CLOCK_50(CLOCK_50),
     .newClk(clonke)
     );
+	 
+	wire start;
 
   // update the ram
   ram_update update(
@@ -92,7 +99,8 @@ module DE2Tron(
     .out(out),
     .data(data),
     .clonke(clonke),
-    .halfclk(halfclk)
+    .halfclk(halfclk),
+	 .start_drawing(start)
     );
 
   wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
@@ -291,12 +299,13 @@ module move(CLOCK_50, clonke, p1, p2, p3, p4, p1out, p2out, p3out, p4out);
 endmodule
 
 
-module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1out, p2out, p3out, p4out, wren_ram);
+module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1out, p2out, p3out, p4out, wren_ram, start_drawing);
 
   input clonke, halfclk;
   input [17:0] p1, p2, p3, p4;
   output reg[17:0] p1out, p2out, p3out, p4out;
   output reg wren_ram;
+  output reg start_drawing;
   initial
   begin
 	p1out = p1;
@@ -322,7 +331,8 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
               write_p3 = 6'd7,
               write_p4 = 6'd8,
 				  schleep1 = 6'd9,
-				  schleep2 = 6'd10;
+				  schleep2 = 6'd10,
+				  draw_start = 6'd11;
 
   always@(posedge halfclk)
     begin
@@ -337,7 +347,8 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
         write_p1: ram_fsm = write_p2;
         write_p2: ram_fsm = write_p3;
         write_p3: ram_fsm = write_p4;
-        write_p4: ram_fsm = sleep;
+        write_p4: ram_fsm = draw_start;
+		  draw_start: ram_fsm = sleep;
         default: ram_fsm = sleep;
       endcase
     end
@@ -348,9 +359,12 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
       begin
         case(ram_fsm)
 		  
-		  sleep: wren_ram <= 0;
-
-        read_p1: // read location value of player 1
+		  sleep: 
+		  begin
+		  wren_ram <= 0;
+		  start_drawing <= 0;
+        end
+		  read_p1: // read location value of player 1
 			begin
 				wren <= 0;
 				address[14:0] <= p1[14:0];
@@ -494,7 +508,10 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 							end
 					endcase
 			end
-
+		draw_start: // send a "clock" pulse to the vga controller to start drawing
+			begin
+				start_drawing <= 1;
+			end
       endcase
 		end
 
