@@ -48,6 +48,7 @@ module DE2Tron(
     wire [2:0] colour;
     wire [7:0] x;
     wire [6:0] y;
+	 
     wire writeEn;
 
     // Create an Instance of a VGA controller - there can be only one!
@@ -57,9 +58,9 @@ module DE2Tron(
             .resetn(resetn),
             .clock(CLOCK_50),
             .colour(colour),
-            .x(x),
-            .y(y),
-            .plot(writeEn),
+            .x(xlmao),//.x(x),
+            .y(ylmao),//.y(y),
+            .plot(1'b1),//.plot(writeEn),
             /* Signals for the DAC to drive the monitor. */
             .VGA_R(VGA_R),
             .VGA_G(VGA_G),
@@ -82,12 +83,10 @@ module DE2Tron(
     wire start_drawing = KEY[1];
     reg [14:0] coordinate_input;
     //assign coordinate_input = 15'b001101110010111;//p1[14:0];
+	 wire xlmao = p1[14:7];
+	 wire ylmao = p1[6:0];
 	 initial begin
 	 coordinate_input = 15'b001101110010111;
-	 end
-	 always@(posedge clonke)
-	 begin
-	 coordinate_input <= coordinate_input + 1'b1;
 	 end
 
     assign colour = 3'b001;
@@ -242,8 +241,10 @@ module datapath(
 							*/
 						  if (ld_pos)
 							begin
-								x_reg <= data_in[14:7];
-								y_reg <= data_in[6:0];
+								//x_reg <= data_in[14:7];
+								//y_reg <= data_in[6:0];
+								x_reg <= 8'b00110111;
+								y_reg <= 7'b0010111;
 							end
                     if (ld_draw)
                         drawing <= 1'b1;
