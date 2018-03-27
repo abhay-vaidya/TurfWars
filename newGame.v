@@ -3,21 +3,29 @@
 module game(
   CLOCK_50,
   clonke,
-  KEY_PRESSED
+  KEY_PRESSED,
+  p1, p2, p3, p4
   );
+  
+  output reg [17:0] p1, p2, p3, p4;
+  
+  always@(*)
+	begin
+	  p1[17:0] = {alive[3], direction[7:6], player_x[31:24], player_y[27:21]};
+	  p2[17:0] = {alive[2], direction[5:4], player_x[23:16], player_y[20:14]};
+	  p3[17:0] = {alive[1], direction[3:2], player_x[15:8], player_y[13:7]};
+	  p4[17:0] = {alive[0], direction[1:0], player_x[7:0], player_y[6:0]};
+	end
 
   input CLOCK_50;
   output wire clonke;
   input [4:0] KEY_PRESSED;
 
-  reg reset;
-  initial begin
-    reset = 0;
-  end
+  reg reset = 1'b0;
 
   RateDivider div(CLOCK_50, clonke);
 
-  players p(); // initiate player regs
+  //players p(); // initiate player regs
   move m(clonke); // update player locations
   directions d(CLOCK_50, clonke, KEY_PRESSED); // update player directions
 
@@ -36,7 +44,7 @@ module game(
 
   ram_update update(
     .CLOCK_50(CLOCK_50),
-    .clonke(),
+    .clonke(clonke),
     .wren(wren),
     .address(address),
     .out(out),
@@ -47,19 +55,20 @@ endmodule
 
 
 module players; // usage : players.p1 = ...;
-  reg [17:0] p1, p2, p3, p4;
-  initial begin
-    p1 = 18'b100111111111111111; // start bottom right, move up
-    p2 = 18'b101000000000000000; // start top left, move down
-    p3 = 18'b110111111110000000; // start top right, move left
-    p4 = 18'b111000000001111111; // start bottom left, move right
-  end
+  reg [17:0] p1 = 18'b100_10011110_1110111;
+  reg [17:0] p2 = 18'b101_00000000_0000001;
+  reg [17:0] p3 = 18'b110_10011110_0000001;
+  reg [17:0] p4 = 18'b111_00000000_1110111;
   /*
   17 : Active/Inactive player
   16-15 : Direction 00->11 : Up, Down, Left, Right
   14-7 : X co-ordinate
   6-0 : Y co-ordinate
   */
+  reg [3:0] alive = 4'b1_1_1_1;
+  reg [7:0] directions = 8'b00_01_10_11;
+  reg [31:0] player_x = 32'b10011110_00000000_10011110_00000000;
+  reg [27:0] player_y = 28'b1110111_0000001_0000001_1110111;
 endmodule
 
 
@@ -148,9 +157,18 @@ module ram_update(
   wren,
   address,
   out,
-  data
+  data,
+  p1, p2, p3, p4,
+  p1a, p2a, p3a, p4a
   );
 
+  output reg p1a = 1'b1;
+  output reg p2a = 1'b1;
+  output reg p3a = 1'b1;
+  output reg p4a = 1'b1;
+  
+  input [14:0] p1, p2, p3, p4;
+  
   input CLOCK_50, clonke;
 
   output reg wren;
@@ -194,39 +212,39 @@ module ram_update(
       case(ram_fsm)
 
         read_p1: begin
-          address[14:0] <= players.p1[14:0];
-          p1_curr[17:3] <= players.p1[14:0];
+          address[14:0] <= p1[14:0];
+          p1_curr[17:3] <= p1[14:0];
           p1_curr[2:0] <= out[2:0];
         end
 
         read_p2: begin
-          address[14:0] <= players.p2[14:0];
-          p2_curr[17:3] <= players.p2[14:0];
+          address[14:0] <= p2[14:0];
+          p2_curr[17:3] <= p2[14:0];
           p2_curr[2:0] <= out[2:0];
         end
 
         read_p3: begin
-          address[14:0] <= players.p3[14:0];
-          p3_curr[17:3] <= players.p3[14:0];
+          address[14:0] <= p3[14:0];
+          p3_curr[17:3] <= p3[14:0];
           p3_curr[2:0] <= out[2:0];
         end
 
         read_p4: begin
-          address[14:0] <= players.p4[14:0];
-          p4_curr[17:3] <= players.p4[14:0];
+          address[14:0] <= p4[14:0];
+          p4_curr[17:3] <= p4[14:0];
           p4_curr[2:0] <= out[2:0];
         end
 
         write_p1: begin
           wren <= 1'b1;
           address[14:0] <= p1_curr[17:3];
-          if(players.p1[17])
+          if(p1[17])
             case(p1_curr[2:0])
               3'b000:
                 begin
                   if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
                     begin
-                      players.p1[17] <= 1'b0;
+                      p1[17] <= 1'b0;
                       data <= 3'b111;
                     end
                   else
@@ -236,7 +254,7 @@ module ram_update(
                 end
               default:
                 begin
-                  players.p1[17] <= 1'b0;
+                  p1[17] <= 1'b0;
                   data <= 3'b111;
                 end
             endcase
@@ -245,13 +263,13 @@ module ram_update(
         write_p2: begin
           wren <= 1'b1;
           address[14:0] <= p2_curr[17:3];
-          if(players.p2[17])
+          if(p2[17])
             case(p2_curr[2:0])
               3'b000:
                 begin
                   if (p2_curr[17:3] == p1_curr[17:3] || p2_curr[17:3] == p3_curr[17:3] || p2_curr[17:3] == p4_curr[17:3]) // collision
                     begin
-                      players.p2[17] <= 1'b0;
+                      p2[17] <= 1'b0;
                       data <= 3'b111;
                     end
                   else
@@ -261,7 +279,7 @@ module ram_update(
                 end
               default:
                 begin
-                  players.p2[17] <= 1'b0;
+                  p2[17] <= 1'b0;
                   data <= 3'b111;
                 end
             endcase
@@ -270,13 +288,13 @@ module ram_update(
         write_p3: begin
           wren <= 1'b1;
           address[14:0] <= p3_curr[17:3];
-          if(players.p3[17])
+          if(p3[17])
             case(p3_curr[2:0])
               3'b000:
                 begin
                   if (p3_curr[17:3] == p1_curr[17:3] || p3_curr[17:3] == p2_curr[17:3] || p3_curr[17:3] == p4_curr[17:3])
                     begin
-                      players.p3[17] <= 1'b0;
+                      p3[17] <= 1'b0;
                       data <= 3'b111;
                     end
                   else
@@ -286,7 +304,7 @@ module ram_update(
                 end
               default:
                 begin
-                  players.p3[17] <= 1'b0;
+                  p3[17] <= 1'b0;
                   data <= 3'b111;
                 end
             endcase
@@ -295,13 +313,13 @@ module ram_update(
         write_p4: begin
           wren <= 1'b1;
           address[14:0] <= p4_curr[17:3];
-          if(players.p4[17])
+          if(p4[17])
             case(p4_curr[2:0])
               3'b000:
                 begin
                   if (p4_curr[17:3] == p1_curr[17:3] || p4_curr[17:3] == p2_curr[17:3] || p4_curr[17:3] == p3_curr[17:3])
                     begin
-                      players.p4[17] <= 1'b0;
+                      p4[17] <= 1'b0;
                       data <= 3'b111;
                     end
                   else
@@ -311,7 +329,7 @@ module ram_update(
                 end
               default:
                 begin
-                  players.p4[17] <= 1'b0;
+                  p4[17] <= 1'b0;
                   data <= 3'b111;
                 end
             endcase
@@ -338,7 +356,7 @@ module RateDivider(CLOCK_50, clonke);
   //assign counter = 28'b0000000000000000000000000000;
   initial
 	begin
-		load = 28'd12499999;
+		load = 28'd4999999;//28'd12499999;
 	end
   always@(posedge CLOCK_50)
     begin

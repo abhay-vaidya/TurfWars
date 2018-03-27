@@ -1,4 +1,4 @@
-`include "vga_adapter/vga_adapter.v"
+	`include "vga_adapter/vga_adapter.v"
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
@@ -6,25 +6,33 @@
 `include "ps2controller.v"
 
 module DE2Tron(
-  CLOCK_50,
+    CLOCK_50,    // On Board 50 MHz
+    PS2_KBCLK,
+    PS2_KBDAT,
 
-  PS2_KBCLK, PS2_KBDAT,
+    // The ports below are for the VGA output.  Do not change.
+    VGA_CLK,       //    VGA Clock
+    VGA_HS,        //    VGA H_SYNC
+    VGA_VS,        //    VGA V_SYNC
+    VGA_BLANK_N,   //    VGA BLANK
+    VGA_SYNC_N,    //    VGA SYNC
+    VGA_R,         //    VGA Red[9:0]
+    VGA_G,         //    VGA Green[9:0]
+    VGA_B         //    VGA Blue[9:0]
+    );
+    input PS2_KBCLK, PS2_KBDAT;
+    input           CLOCK_50;    //    50 MHz
 
-  VGA_CLK,
-  VGA_SYNC_N, VGA_BLANK_N,
-  VGA_VS, VGA_HS,
-  VGA_R, VGA_G, VGA_B
-
-  );
-
-  input CLOCK_50;
-
-  input PS2_KBCLK, PS2_KBDAT;
-
-  output VGA_CLK;
-  output VGA_SYNC_N, VGA_BLANK_N;
-  output VGA_VS, VGA_HS;
-  output [9:0] VGA_R, VGA_G, VGA_B;
+    // Declare your inputs and outputs here
+    // Do not change the following outputs
+    output             VGA_CLK;       //    VGA Clock
+    output             VGA_HS;        //    VGA H_SYNC
+    output             VGA_VS;        //    VGA V_SYNC
+    output             VGA_BLANK_N;   //    VGA BLANK
+    output             VGA_SYNC_N;    //    VGA SYNC
+    output    [9:0]    VGA_R;         //    VGA Red[9:0]
+    output    [9:0]    VGA_G;         //    VGA Green[9:0]
+    output    [9:0]    VGA_B;         //    VGA Blue[9:0]
 
 
   keyboard kb(
