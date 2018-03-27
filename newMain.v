@@ -132,29 +132,29 @@ module datapath(
 
     if (ld_p1)
       begin
-        x <= p1[14:7]
-        y <= p1[6:0]
+        x <= p1[14:7];
+        y <= p1[6:0];
         colour <= 3'b001;
       end
 
     else if (ld_p2)
       begin
-        x <= p2[14:7]
-        y <= p2[6:0]
+        x <= p2[14:7];
+        y <= p2[6:0];
         colour <= 3'b010;
       end
 
     else if (ld_p3)
       begin
-        x <= p3[14:7]
-        y <= p3[6:0]
+        x <= p3[14:7];
+        y <= p3[6:0];
         colour <= 3'b100;
       end
 
     else if (ld_p4)
       begin
-        x <= p4[14:7]
-        y <= p4[6:0]
+        x <= p4[14:7];
+        y <= p4[6:0];
         colour <= 3'b110;
       end
 
