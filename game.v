@@ -360,7 +360,7 @@ module ram_update(p1, p2, p3, p4, wren, address, out, data, clonke, halfclk, p1o
 				p2_curr[2:0] <= out[2:0];
 			end
         read_p3: // read location of value of player 3
-			begin	
+			begin
 				wren <= 0;
 				address[14:0] <= p3[14:0];
 				p3_curr[17:3] <= p3[14:0];

@@ -48,7 +48,7 @@ module DE2Tron(
     wire [2:0] colour;
     wire [7:0] x;
     wire [6:0] y;
-	 
+
     wire writeEn;
 
     // Create an Instance of a VGA controller - there can be only one!
@@ -235,7 +235,7 @@ module datapath(
 						  /*
                     if (ld_x)
                         x_reg <= { 1'b0, data_in };
-                    /* load y 
+                    /* load y
                     if (ld_y)
                         y_reg <= data_in;
 							*/
