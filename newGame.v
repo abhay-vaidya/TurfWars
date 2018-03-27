@@ -170,13 +170,10 @@ module ram_update(
               write_p3 = 6'd7,
               write_p4 = 6'd8;
 
-  reg run, done;
-
   always@(*)
     begin
-      run = !clonke && !done;
       case(ram_fsm)
-        sleep: next_state = run ? read_p1 : sleep;
+        sleep: next_state = !clonke ? read_p1 : sleep; // cycle when clonke is off
         read_p1: next_state = read_p2;
         read_p2: next_state = read_p3;
         read_p3: next_state = read_p4;
@@ -186,11 +183,7 @@ module ram_update(
         write_p3: next_state = write_p4;
         write_p4: next_state = sleep;
         default: next_state = sleep;
-    end
-
-  always@(posedge clonke)
-    begin
-      done = 1'b0; // reset done every clonke cycle
+      endcase
     end
 
   reg [17:0] p1_curr, p2_curr, p3_curr, p4_curr; // [17:3] location, [2:0] colour
@@ -229,7 +222,9 @@ module ram_update(
           if(players.p1[17])
             case(p1_curr[2:0])
               3'b000: begin
-                //if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
+                if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
+                  begin
+                  end
               end
 
             endcase
@@ -242,7 +237,6 @@ module ram_update(
         end
 
         write_p4: begin
-          done = 1'b1; // finished running
         end
       endcase
     end
