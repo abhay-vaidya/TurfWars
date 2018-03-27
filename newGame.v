@@ -217,27 +217,106 @@ module ram_update(
           p4_curr[2:0] <= out[2:0];
         end
 
-        write_p1: begin // write to location, if not dead
+        write_p1: begin
           wren <= 1'b1;
+          address[14:0] <= p1_curr[17:3];
           if(players.p1[17])
             case(p1_curr[2:0])
-              3'b000: begin
-                if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
-                  begin
-                  end
-              end
-
+              3'b000:
+                begin
+                  if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
+                    begin
+                      players.p1[17] <= 1'b0;
+                      data <= 3'b111;
+                    end
+                  else
+                    begin
+                      data <= 3'b001;
+                    end
+                end
+              default:
+                begin
+                  players.p1[17] <= 1'b0;
+                  data <= 3'b111;
+                end
             endcase
         end
 
         write_p2: begin
+          wren <= 1'b1;
+          address[14:0] <= p2_curr[17:3];
+          if(players.p2[17])
+            case(p2_curr[2:0])
+              3'b000:
+                begin
+                  if (p2_curr[17:3] == p1_curr[17:3] || p2_curr[17:3] == p3_curr[17:3] || p2_curr[17:3] == p4_curr[17:3]) // collision
+                    begin
+                      players.p2[17] <= 1'b0;
+                      data <= 3'b111;
+                    end
+                  else
+                    begin
+                      data <= 3'b010;
+                    end
+                end
+              default:
+                begin
+                  players.p2[17] <= 1'b0;
+                  data <= 3'b111;
+                end
+            endcase
         end
 
         write_p3: begin
+          wren <= 1'b1;
+          address[14:0] <= p3_curr[17:3];
+          if(players.p3[17])
+            case(p3_curr[2:0])
+              3'b000:
+                begin
+                  if (p3_curr[17:3] == p1_curr[17:3] || p3_curr[17:3] == p2_curr[17:3] || p3_curr[17:3] == p4_curr[17:3])
+                    begin
+                      players.p3[17] <= 1'b0;
+                      data <= 3'b111;
+                    end
+                  else
+                    begin
+                      data <= 3'b100;
+                    end
+                end
+              default:
+                begin
+                  players.p3[17] <= 1'b0;
+                  data <= 3'b111;
+                end
+            endcase
         end
 
         write_p4: begin
+          wren <= 1'b1;
+          address[14:0] <= p4_curr[17:3];
+          if(players.p4[17])
+            case(p4_curr[2:0])
+              3'b000:
+                begin
+                  if (p4_curr[17:3] == p1_curr[17:3] || p4_curr[17:3] == p2_curr[17:3] || p4_curr[17:3] == p3_curr[17:3])
+                    begin
+                      players.p4[17] <= 1'b0;
+                      data <= 3'b111;
+                    end
+                  else
+                    begin
+                      data <= 3'b110;
+                    end
+                end
+              default:
+                begin
+                  players.p4[17] <= 1'b0;
+                  data <= 3'b111;
+                end
+            endcase
         end
+
       endcase
     end
 
