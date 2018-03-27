@@ -2,7 +2,7 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
-`include "game.v"
+`include "newGame.v"
 `include "ps2controller.v"
 
 module DE2Tron(
