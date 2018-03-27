@@ -35,19 +35,18 @@ module DE2Tron(
     );
 
   wire [4:0] KEY_PRESSED;
-  wire start; // unused for now
   wire clonke;
+
   wire [17:0] p1, p2, p3, p4;
+  assign p1 = players.p1;
+  assign p2 = players.p2;
+  assign p3 = players.p3;
+  assign p4 = players.p4;
 
   game g(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
-    .KEY_PRESSED(KEY_PRESSED),
-    .start(start),
-    .p1(p1),
-    .p2(p2),
-    .p3(p3),
-    .p4(p4)
+    .KEY_PRESSED(KEY_PRESSED)
     );
 
 
