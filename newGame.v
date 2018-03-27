@@ -171,10 +171,10 @@ module ram_update(
               write_p4 = 6'd8;
 
   reg run, done;
-  assign run = !clonke && !done;
 
   always@(*)
     begin
+      run = !clonke && !done;
       case(ram_fsm)
         sleep: next_state = run ? read_p1 : sleep;
         read_p1: next_state = read_p2;
@@ -202,29 +202,37 @@ module ram_update(
 
         read_p1: begin
           address[14:0] <= players.p1[14:0];
-          p1_curr[17:3] <= players.p1[14:0]
+          p1_curr[17:3] <= players.p1[14:0];
           p1_curr[2:0] <= out[2:0];
         end
 
         read_p2: begin
           address[14:0] <= players.p2[14:0];
-          p2_curr[17:3] <= players.p2[14:0]
+          p2_curr[17:3] <= players.p2[14:0];
           p2_curr[2:0] <= out[2:0];
         end
 
         read_p3: begin
           address[14:0] <= players.p3[14:0];
-          p3_curr[17:3] <= players.p3[14:0]
+          p3_curr[17:3] <= players.p3[14:0];
           p3_curr[2:0] <= out[2:0];
         end
 
         read_p4: begin
           address[14:0] <= players.p4[14:0];
-          p4_curr[17:3] <= players.p4[14:0]
+          p4_curr[17:3] <= players.p4[14:0];
           p4_curr[2:0] <= out[2:0];
         end
 
-        write_p1: begin
+        write_p1: begin // write to location, if not dead
+          wren <= 1'b1;
+          if(players.p1[17])
+            case(p1_curr[2:0])
+              3'b000: begin
+                //if (p1_curr[17:3] == p2_curr[17:3] || p1_curr[17:3] == p3_curr[17:3] || p1_curr[17:3] == p4_curr[17:3]) // collision
+              end
+
+            endcase
         end
 
         write_p2: begin
