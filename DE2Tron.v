@@ -1,9 +1,10 @@
-	`include "vga_adapter/vga_adapter.v"
+`include "vga_adapter/vga_adapter.v"
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
 `include "newGame.v"
 `include "ps2controller.v"
+`include "ram19200x3.v"
 
 module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
@@ -24,7 +25,7 @@ module DE2Tron(
     );
 
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
-	 
+
 	 hex_display h7(p4[14:11], HEX7[6:0]);
 	 hex_display h6(p4[10:7], HEX6[6:0]);
 	 hex_display h5(p4[6:4], HEX5[6:0]);
@@ -34,7 +35,7 @@ module DE2Tron(
 	 hex_display h2(p2[10:7], HEX2[6:0]);
 	 hex_display h1(p2[6:4], HEX1[6:0]);
 	 hex_display h0(p2[3:0], HEX0[6:0]);
-	 
+
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
 
@@ -61,27 +62,117 @@ module DE2Tron(
   wire [4:0] KEY_PRESSED;
   wire clonke;
 
-  wire [14:0] p1, p2, p3, p4;
-  /*
-  always@(posedge clonke) begin
-    p1 = p1 - 1'b1; // start bottom right, move up
-    //p2 = p2 + 1'b1; // start top left, move down
-    //p3 = p3 - 8'b10000000;// start top right, move left
-    //p4 = p4 + 8'b10000000; // start bottom left, move right
-  end  */
+	RateDivider div(CLOCK_50, clonke);
 
-  //assign p3 = players.p3;
-  //assign p4 = players.p4;
+	///////
 
+	  wire [14:0] newp1, newp2, newp3, newp4;
+
+	  always@(posedge CLOCK_50)
+	    begin
+	      p1 = newp1;
+	      p2 = newp2;
+	      p3 = newp3;
+	      p4 = newp4;
+	    end
+
+	  move m(
+	    .clonke(clonke),
+	    .p1({p1a, p1d, p1}), // pass in player is alive, direction, and current location
+	    .p2({p2a, p2d, p2}),
+	    .p3({p3a, p3d, p3}),
+	    .p4({p4a, p4d, p4}),
+	    .newp1(newp1), // updated locations
+	    .newp2(newp2),
+	    .newp3(newp3),
+	    .newp4(newp4)
+	    );
+
+	  wire [1:0] newp1d, newp2d, newp3d, newp4d;
+	  always@(posedge CLOCK_50)
+	    begin
+	      p1d = newp1d;
+	      p2d = newp2d;
+	      p3d = newp3d;
+	      p4d = newp4d;
+	    end
+
+	  directions d(
+	    .KEY_PRESSED(KEY_PRESSED),
+	    .p1d(newp1d),
+	    .p2d(newp2d),
+	    .p3d(newp3d),
+	    .p4d(newp4d)
+	    );
+
+	  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
+	  wire [14:0] address; // 15 bits, 8 X bits, 7 Y bits
+	  wire [2:0] out; // data in the ram at the given address (3 bits)
+	  wire [2:0] data; // data to be written (3 bits)
+
+	  ram32768x3 ram(
+	    .address(address),
+	  	.clock(CLOCK_50),
+	  	.data(data),
+	  	.wren(wren),
+	  	.q(out)
+	    );
+
+	  wire newp1a, newp2a, newp3a, newp4a;
+
+	  always@(posedge CLOCK_50)
+	    begin
+	      p1a = newp1a;
+	      p2a = newp2a;
+	      p3a = newp3a;
+	      p4a = newp4a;
+	    end
+
+	  ram_update update(
+	    .CLOCK_50(CLOCK_50),
+	    .clonke(clonke),
+	    .wren(wren),
+	    .address(address),
+	    .out(out),
+	    .data(data),
+	    .p1({p1a, p1}),
+	    .p2({p2a, p2}),
+	    .p3({p3a, p3}),
+	    .p4({p4a, p4}),
+	    .p1a(newp1a),
+	    .p2a(newp2a),
+	    .p3a(newp3a),
+	    .p4a(newp4a)
+	    );
+	///////
+
+  //wire [14:0] p1, p2, p3, p4;
+
+	reg [14:0] p1 = 15'b10011110_1110111; // start bottom right
+	reg [14:0] p2 = 15'b00000000_0000001; // start top left
+	reg [14:0] p3 = 15'b10011110_0000001; // start top right
+	reg [14:0] p4 = 15'b00000000_1110111; // start bottom left
+
+	// player directions
+  reg [1:0] p1d = 2'b00; // start moving up
+  reg [1:0] p2d = 2'b01; // start moving down
+  reg [1:0] p3d = 2'b10; // start moving left
+  reg [1:0] p4d = 2'b11; // start moving right
+
+	// player is alive
+  reg p1a = 1'b1;
+  reg p2a = 1'b1;
+  reg p3a = 1'b1;
+  reg p4a = 1'b1;
 
   game g(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
     .KEY_PRESSED(KEY_PRESSED),
-	 .p1(p1),
-	 .p2(p2),
-	 .p3(p3),
-	 .p4(p4)
+	 	.p1(p1),
+	 	.p2(p2),
+	 	.p3(p3),
+	 	.p4(p4)
     );
 
 

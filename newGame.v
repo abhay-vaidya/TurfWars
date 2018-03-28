@@ -1,5 +1,4 @@
-`include "ram19200x3.v"
-
+/*
 module game(
   CLOCK_50,
   clonke,
@@ -12,7 +11,7 @@ module game(
   output reg [14:0] p2 = 15'b00000000_0000001; // start top left
   output reg [14:0] p3 = 15'b10011110_0000001; // start top right
   output reg [14:0] p4 = 15'b00000000_1110111; // start bottom left
-  
+
   // player directions
   reg [1:0] p1d = 2'b00; // start moving up
   reg [1:0] p2d = 2'b01; // start moving down
@@ -32,7 +31,7 @@ module game(
   RateDivider div(CLOCK_50, clonke);
 
   wire [14:0] newp1, newp2, newp3, newp4;
-  /*
+
   always@(posedge CLOCK_50)
     begin
       p1 = newp1;
@@ -40,14 +39,10 @@ module game(
       p3 = newp3;
       p4 = newp4;
     end
-*/
-  wire [17:0] p1m, p2m, p3m, p4m;
-  assign p1m[17:0] = {p1a, p1d, p1};
 
-  
   move m(
     .clonke(clonke),
-    .p1(p1m), // pass in player is alive, direction, and current location
+    .p1({p1a, p1d, p1}), // pass in player is alive, direction, and current location
     .p2({p2a, p2d, p2}),
     .p3({p3a, p3d, p3}),
     .p4({p4a, p4d, p4}),
@@ -88,7 +83,7 @@ module game(
     );
 
   wire newp1a, newp2a, newp3a, newp4a;
-  /*
+
   always@(posedge CLOCK_50)
     begin
       p1a = newp1a;
@@ -96,7 +91,7 @@ module game(
       p3a = newp3a;
       p4a = newp4a;
     end
-*/
+
   ram_update update(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
@@ -115,6 +110,7 @@ module game(
     );
 
 endmodule
+*/
 
 
 module directions(
