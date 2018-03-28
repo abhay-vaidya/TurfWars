@@ -202,6 +202,7 @@ module read_ram(
     begin
       if (!running && !done)
         begin
+			 address <= address + 1'b1;
           case (out)
             3'b001: p1_count <= p1_count + 1'b1;
             3'b010: p2_count <= p2_count + 1'b1;
@@ -214,13 +215,13 @@ module read_ram(
           endcase
         end
     end
-
+/*
   always@(negedge CLOCK_50)
     begin
       if (!running && !done)
         address <= address + 1'b1;
     end
-
+*/
   always@(*)
     begin
       if (done)
@@ -243,5 +244,29 @@ module read_ram(
                 winner <= 2'b11;
         end
     end
+
+endmodule
+
+module RateDivider(CLOCK_50, clonke);
+
+  input CLOCK_50;
+  output clonke;
+  reg [27:0] load;
+  reg [27:0] counter;
+
+  //assign counter = 28'b0000000000000000000000000000;
+  initial
+	begin // 10hz
+		load = 28'd1249999;//28'd12499999;
+	end
+  always@(posedge CLOCK_50)
+    begin
+      if (counter == 0)
+        counter <= load;
+      else
+        counter <= counter - 1'b1;
+    end
+
+  assign clonke = (counter == 0) ? 1 : 0; //_____|_____|_____
 
 endmodule

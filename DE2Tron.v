@@ -10,8 +10,9 @@ module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
     PS2_KBCLK,
     PS2_KBDAT,
+	 SW,
 
-	 //HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
+	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
     VGA_CLK,       //    VGA Clock
@@ -24,13 +25,14 @@ module DE2Tron(
     VGA_B         //    VGA Blue[9:0]
     );
 
-	 //output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
-/*
-	 hex_display h7(p1d[1:0], HEX7[6:0]);
-	 hex_display h6(p2d[1:0], HEX6[6:0]);
-	 hex_display h5(p3d[1:0], HEX5[6:0]);
-	 hex_display h4(p4d[1:0], HEX4[6:0]);
+	 input [1:0] SW;
+	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
+	 hex_display h7(address[14:11], HEX7[6:0]);
+	 hex_display h6(address[10:7], HEX6[6:0]);
+	 hex_display h5(address[6:3], HEX5[6:0]);
+	 hex_display h4(address[2:0], HEX4[6:0]);
+/*
 	 hex_display h3(p2[14:11], HEX3[6:0]);
 	 hex_display h2(p2[10:7], HEX2[6:0]);
 	 hex_display h1(p2[6:4], HEX1[6:0]);
@@ -103,6 +105,7 @@ module DE2Tron(
 	    );
 
 		wire running;
+		assign running = SW[0];
 		wire [1:0] winner;
 
 		wire [14:0] p1_count, p2_count, p3_count, p4_count;
