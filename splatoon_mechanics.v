@@ -114,13 +114,13 @@ module write_ram(
   output reg [14:0] address;
   output reg [2:0] data;
 
-  reg [5:0] current_state, next_state;
+  reg [3:0] current_state, next_state;
 
-  localparam  START = 5'd0,
-              WRITE_P1 = 5'd1,
-              WRITE_P2 = 5'd2,
-              WRITE_P3 = 5'd3,
-              WRITE_P4 = 5'd4;
+  localparam  START = 3'd0,
+              WRITE_P1 = 3'd1,
+              WRITE_P2 = 3'd2,
+              WRITE_P3 = 3'd3,
+              WRITE_P4 = 3'd4;
 
   /*
   start -> running ? (write1, write2, write3, write4 -> start) , start
@@ -176,6 +176,97 @@ endmodule
 
 
 module read_ram(
+  CLOCK_50,
+  running,
+  address,
+  out,
+  p1_count, p2_count, p3_count, p4_count,
+  winner
+  );
+
+  input CLOCK_50, running;
+
+  input [2:0] out;
+
+  output reg [1:0] winner;
+  output reg [14:0] address;
+
+  output reg [14:0] p1_count, p2_count, p3_count, p4_count;
+
+  reg [1:0] current_state, next_state;
+
+  localparam  START = 2'd0,
+              READ = 2'd1,
+              INCREMENT = 2'd2;
+
+  reg done;
+  wire go;
+  assign go = !running && !done;
+
+  always@(*)
+    begin: state_table
+      case (current_state)
+        START : next_state = go ? READ : START;
+        READ : next_state = INCREMENT;
+        INCREMENT : next_state = START;
+        default : next_state = START;
+      endcase
+    end
+
+  always@(*)
+    begin
+      case (current_state)
+        READ : begin
+
+            if (address >= 15'b10011110_1110111)
+              done <= 1;
+
+            case (out)
+              3'b001: p1_count <= p1_count + 1'b1;
+              3'b010: p2_count <= p2_count + 1'b1;
+              3'b100: p3_count <= p3_count + 1'b1;
+              3'b110: p4_count <= p4_count + 1'b1;
+            endcase
+
+          end
+        INCREMENT : begin
+            address[14:0] <= address[14:0] + 1'b1;
+          end
+      endcase
+    end
+
+  always@(posedge CLOCK_50)
+    begin
+      current_state <= next_state;
+    end
+
+  always@(*)
+    begin
+      if (done)
+        begin
+          if (p1_count >= p2_count)
+            if (p1_count >= p3_count)
+              if (p1_count >= p4_count)
+                winner <= 2'b00; // p1
+          if (p2_count >= p1_count)
+            if (p2_count >= p3_count)
+              if (p2_count >= p4_count)
+                winner <= 2'b01;
+          if (p3_count >= p1_count)
+            if (p3_count >= p2_count)
+              if (p3_count >= p4_count)
+                winner <= 2'b10;
+          if (p4_count >= p1_count)
+            if (p4_count >= p2_count)
+              if (p4_count >= p3_count)
+                winner <= 2'b11;
+        end
+    end
+
+endmodule
+
+
+module old_read(
   CLOCK_50,
   running,
   address,

@@ -110,13 +110,15 @@ module DE2Tron(
 
 		wire [14:0] p1_count, p2_count, p3_count, p4_count;
 		wire [14:0] write_address, read_address;
+		wire wren_write;
 
 		assign address[14:0] = running ? write_address : read_address;
+		assign wren = running ? wren_write : 1'b0;
 
 		write_ram write(
 			.CLOCK_50(CLOCK_50),
 			.running(running),
-			.wren(wren),
+			.wren(wren_write),
 			.address(write_address),
 			.data(data),
 			.p1(p1),
