@@ -31,24 +31,42 @@ module game(
 
   RateDivider div(CLOCK_50, clonke);
 
+  wire [14:0] newp1, newp2, newp3, newp4;
+  always@(*)
+    begin
+      p1 = newp1;
+      p2 = newp2;
+      p3 = newp3;
+      p4 = newp4;
+    end
+
   move m(
     .clonke(clonke),
     .p1({p1a, p1d, p1}), // pass in player is alive, direction, and current location
     .p2({p2a, p2d, p2}),
     .p3({p3a, p3d, p3}),
     .p4({p4a, p4d, p4}),
-    .newp1(p1), // updated locations
-    .newp2(p2),
-    .newp3(p3),
-    .newp4(p4)
+    .newp1(newp1), // updated locations
+    .newp2(newp2),
+    .newp3(newp3),
+    .newp4(newp4)
     );
+
+  wire [1:0] newp1d, newp2d, newp3d, newp4d;
+  always@(*)
+    begin
+      p1d = newp1d;
+      p2d = newp2d;
+      p3d = newp3d;
+      p4d = newp4d;
+    end
 
   directions d(
     .KEY_PRESSED(KEY_PRESSED),
-    .p1d(p1d[1:0]),
-    .p2d(p2d[1:0]),
-    .p3d(p3d[1:0]),
-    .p4d(p4d[1:0])
+    .p1d(newp1d),
+    .p2d(newp2d),
+    .p3d(newp3d),
+    .p4d(newp4d)
     );
 
   wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
@@ -64,6 +82,15 @@ module game(
   	.q(out)
     );
 
+  wire newp1a, newp2a, newp3a, newp4a;
+  always@(*)
+    begin
+      p1a = newp1a;
+      p2a = newp2a;
+      p3a = newp3a;
+      p4a = newp4a;
+    end
+
   ram_update update(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
@@ -75,10 +102,10 @@ module game(
     .p2({p2a, p2}),
     .p3({p3a, p3}),
     .p4({p4a, p4}),
-    .p1a(p1a),
-    .p2a(p2a),
-    .p3a(p3a),
-    .p4a(p4a)
+    .p1a(newp1a),
+    .p2a(newp2a),
+    .p3a(newp3a),
+    .p4a(newp4a)
     );
 
 endmodule
