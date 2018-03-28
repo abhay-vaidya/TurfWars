@@ -114,9 +114,11 @@ endmodule
 
 
 module directions(
+CLOCK_50,
   KEY_PRESSED,
   p1d, p2d, p3d, p4d
   );
+  input CLOCK_50;
 
   input [4:0] KEY_PRESSED;
 
@@ -126,28 +128,28 @@ module directions(
   output reg [1:0] p3d = 2'b10; // start moving left
   output reg [1:0] p4d = 2'b11; // start moving right
 
-  always@(*)
+  always@(posedge CLOCK_50)
     begin
       case (KEY_PRESSED)
-        5'd0: p1d[2:0] <= 2'b00;
-        5'd1: p1d[2:0] <= 2'b01;
-        5'd2: p1d[2:0] <= 2'b10;
-        5'd3: p1d[2:0] <= 2'b11;
+        5'd0: p1d[1:0] <= 2'b00;
+        5'd1: p1d[1:0] <= 2'b01;
+        5'd2: p1d[1:0] <= 2'b10;
+        5'd3: p1d[1:0] <= 2'b11;
 
-        5'd4: p2d[2:0] <= 2'b00;
-        5'd5: p2d[2:0] <= 2'b01;
-        5'd6: p2d[2:0] <= 2'b10;
-        5'd7: p2d[2:0] <= 2'b11;
+        5'd4: p2d[1:0] <= 2'b00;
+        5'd5: p2d[1:0] <= 2'b01;
+        5'd6: p2d[1:0] <= 2'b10;
+        5'd7: p2d[1:0] <= 2'b11;
 
-        5'd8: p3d[2:0] <= 2'b00;
-        5'd9: p3d[2:0] <= 2'b01;
-        5'd10: p3d[2:0] <= 2'b10;
-        5'd11: p3d[2:0] <= 2'b11;
+        5'd8: p3d[1:0] <= 2'b00;
+        5'd9: p3d[1:0] <= 2'b01;
+        5'd10: p3d[1:0] <= 2'b10;
+        5'd11: p3d[1:0] <= 2'b11;
 
-        5'd12: p4d[2:0] <= 2'b00;
-        5'd13: p4d[2:0] <= 2'b01;
-        5'd14: p4d[2:0] <= 2'b10;
-        5'd15: p4d[2:0] <= 2'b11;
+        5'd12: p4d[1:0] <= 2'b00;
+        5'd13: p4d[1:0] <= 2'b01;
+        5'd14: p4d[1:0] <= 2'b10;
+        5'd15: p4d[1:0] <= 2'b11;
         //5'd16: reset game
       endcase
     end
@@ -249,7 +251,7 @@ module ram_update(
   always@(*)
     begin
       case(ram_fsm)
-        sleep: next_state = !clonke ? read_p1 : sleep; // cycle when clonke is off
+        sleep: next_state = clonke ? read_p1 : sleep; // cycle when clonke is off
         read_p1: next_state = read_p2;
         read_p2: next_state = read_p3;
         read_p3: next_state = read_p4;
@@ -414,7 +416,8 @@ module RateDivider(CLOCK_50, clonke);
   //assign counter = 28'b0000000000000000000000000000;
   initial
 	begin // 10hz
-		load = 28'd4999999;//28'd12499999;
+		load = 28'd124
+		9999;//28'd12499999;
 	end
   always@(posedge CLOCK_50)
     begin

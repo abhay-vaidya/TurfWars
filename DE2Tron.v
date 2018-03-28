@@ -11,7 +11,7 @@ module DE2Tron(
     PS2_KBCLK,
     PS2_KBDAT,
 
-	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
+	 //HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
     VGA_CLK,       //    VGA Clock
@@ -24,18 +24,18 @@ module DE2Tron(
     VGA_B         //    VGA Blue[9:0]
     );
 
-	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
-
-	 hex_display h7(p4[14:11], HEX7[6:0]);
-	 hex_display h6(p4[10:7], HEX6[6:0]);
-	 hex_display h5(p4[6:4], HEX5[6:0]);
-	 hex_display h4(p4[3:0], HEX4[6:0]);
+	 //output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
+/*
+	 hex_display h7(p1d[1:0], HEX7[6:0]);
+	 hex_display h6(p2d[1:0], HEX6[6:0]);
+	 hex_display h5(p3d[1:0], HEX5[6:0]);
+	 hex_display h4(p4d[1:0], HEX4[6:0]);
 
 	 hex_display h3(p2[14:11], HEX3[6:0]);
 	 hex_display h2(p2[10:7], HEX2[6:0]);
 	 hex_display h1(p2[6:4], HEX1[6:0]);
 	 hex_display h0(p2[3:0], HEX0[6:0]);
-
+*/
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
 
@@ -66,21 +66,23 @@ module DE2Tron(
 
 	///////
 
-	  wire [14:0] newp1, newp2, newp3, newp4;
+	  wire [14:0] tp1, tp2, tp3, tp4;
+	  reg [14:0] p1, p2, p3, p4;
 	  move m(
 	    .clonke(clonke),
 	    .p1({p1a, p1d}), // pass in player is alive, direction
 	    .p2({p2a, p2d}),
 	    .p3({p3a, p3d}),
 	    .p4({p4a, p4d}),
-	    .newp1(newp1), // updated locations
-	    .newp2(newp2),
-	    .newp3(newp3),
-	    .newp4(newp4)
+	    //.newp1(p1), // updated locations
+	    //.newp2(p2),
+	    //.newp3(p3),
+	    //.newp4(p4)
 	    );
 
 		wire [2:0] p1d, p2d, p3d, p4d;
 	  directions d(
+	  .CLOCK_50(CLOCK_50),
 	    .KEY_PRESSED(KEY_PRESSED),
 	    .p1d(p1d),
 	    .p2d(p2d),
@@ -103,6 +105,41 @@ module DE2Tron(
 
 	  wire p1a, p2a, p3a, p4a;
 
+	  
+	  initial begin
+	  p1 <= 15'b10011110_1110111;
+	  p2 <= 15'b00000000_0000001;
+	  p3 <= 15'b10011110_0000001;
+	  p4 <= 15'b00000000_1110111;
+	  end
+	  always@(posedge clonke)
+	  begin
+		case(p1d)
+		  2'b00: p1[6:0] <= p1[6:0] - 1'b1;
+		  2'b01: p1[6:0] <= p1[6:0] + 1'b1;
+		  2'b10: p1[14:7] <= p1[14:7] - 1'b1;
+		  2'b11:p1[14:7] <= p1[14:7] + 1'b1;
+		endcase
+				case(p2d)
+		  2'b00: p2[6:0] <= p2[6:0] - 1'b1;
+		  2'b01: p2[6:0] <= p2[6:0] + 1'b1;
+		  2'b10: p2[14:7] <= p2[14:7] - 1'b1;
+		  2'b11: p2[14:7] <= p2[14:7] + 1'b1;
+		endcase
+				case(p3d)
+		  2'b00: p3[6:0] <= p3[6:0] - 1'b1;
+		  2'b01: p3[6:0] <= p3[6:0] + 1'b1;
+		  2'b10: p3[14:7] <= p3[14:7] - 1'b1;
+		  2'b11: p3[14:7] <= p3[14:7] + 1'b1;
+		endcase
+				case(p4d)
+		  2'b00: p4[6:0] <= p4[6:0] - 1'b1;
+		  2'b01: p4[6:0] <= p4[6:0] + 1'b1;
+		  2'b10: p4[14:7] <= p4[14:7] - 1'b1;
+		  2'b11: p4[14:7] <= p4[14:7] + 1'b1;
+		endcase
+	  end
+	  
 	  ram_update update(
 	    .CLOCK_50(CLOCK_50),
 	    .clonke(clonke),
@@ -110,7 +147,7 @@ module DE2Tron(
 	    .address(address),
 	    .out(out),
 	    .data(data),
-	    .p1(p1),
+	    //.p1(p1),
 	    .p2(p2),
 	    .p3(p3),
 	    .p4(p4),
@@ -145,7 +182,7 @@ module DE2Tron(
 
   wire ld_p1, ld_p2, ld_p3, ld_p4;
 
-  datapath d(
+  datapath dp(
     .CLOCK_50(CLOCK_50),
     .ld_p1(ld_p1),
     .ld_p2(ld_p2),
