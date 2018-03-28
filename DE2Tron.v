@@ -2,7 +2,7 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
-`include "newGame.v"
+`include "splatoon_mechanics.v"
 `include "ps2controller.v"
 `include "ram19200x3.v"
 
@@ -66,18 +66,17 @@ module DE2Tron(
 
 	///////
 
-	  wire [14:0] tp1, tp2, tp3, tp4;
-	  reg [14:0] p1, p2, p3, p4;
+	  wire [14:0] p1, p2, p3, p4;
 	  move m(
 	    .clonke(clonke),
-	    .p1({p1a, p1d}), // pass in player is alive, direction
-	    .p2({p2a, p2d}),
-	    .p3({p3a, p3d}),
-	    .p4({p4a, p4d}),
-	    //.newp1(p1), // updated locations
-	    //.newp2(p2),
-	    //.newp3(p3),
-	    //.newp4(p4)
+			.p1d(p1d),
+			.p2d(p2d),
+			.p3d(p3d),
+			.p4d(p4d),
+	    .p1(p1),
+	    .p2(p2),
+	    .p3(p3),
+	    .p4(p4)
 	    );
 
 		wire [2:0] p1d, p2d, p3d, p4d;
@@ -103,74 +102,39 @@ module DE2Tron(
 	  	.q(out)
 	    );
 
-	  wire p1a, p2a, p3a, p4a;
+		wire running;
+		wire [1:0] winner;
 
-	  
-	  initial begin
-	  p1 <= 15'b10011110_1110111;
-	  p2 <= 15'b00000000_0000001;
-	  p3 <= 15'b10011110_0000001;
-	  p4 <= 15'b00000000_1110111;
-	  end
-	  always@(posedge clonke)
-	  begin
-		case(p1d)
-		  2'b00: p1[6:0] <= p1[6:0] - 1'b1;
-		  2'b01: p1[6:0] <= p1[6:0] + 1'b1;
-		  2'b10: p1[14:7] <= p1[14:7] - 1'b1;
-		  2'b11:p1[14:7] <= p1[14:7] + 1'b1;
-		endcase
-				case(p2d)
-		  2'b00: p2[6:0] <= p2[6:0] - 1'b1;
-		  2'b01: p2[6:0] <= p2[6:0] + 1'b1;
-		  2'b10: p2[14:7] <= p2[14:7] - 1'b1;
-		  2'b11: p2[14:7] <= p2[14:7] + 1'b1;
-		endcase
-				case(p3d)
-		  2'b00: p3[6:0] <= p3[6:0] - 1'b1;
-		  2'b01: p3[6:0] <= p3[6:0] + 1'b1;
-		  2'b10: p3[14:7] <= p3[14:7] - 1'b1;
-		  2'b11: p3[14:7] <= p3[14:7] + 1'b1;
-		endcase
-				case(p4d)
-		  2'b00: p4[6:0] <= p4[6:0] - 1'b1;
-		  2'b01: p4[6:0] <= p4[6:0] + 1'b1;
-		  2'b10: p4[14:7] <= p4[14:7] - 1'b1;
-		  2'b11: p4[14:7] <= p4[14:7] + 1'b1;
-		endcase
-	  end
-	  
-	  ram_update update(
-	    .CLOCK_50(CLOCK_50),
-	    .clonke(clonke),
-	    .wren(wren),
-	    .address(address),
-	    .out(out),
-	    .data(data),
-	    //.p1(p1),
-	    .p2(p2),
-	    .p3(p3),
-	    .p4(p4),
-	    .p1a(p1a),
-	    .p2a(p2a),
-	    .p3a(p3a),
-	    .p4a(p4a)
-	    );
+		wire [14:0] p1_count, p2_count, p3_count, p4_count;
+		wire [14:0] write_address, read_address;
+
+		assign address[14:0] = running ? write_address : read_address;
+
+		write_ram write(
+			.CLOCK_50(CLOCK_50),
+			.running(running),
+			.wren(wren),
+			.address(write_address),
+			.data(data),
+			.p1(p1),
+			.p2(p2),
+			.p3(p3),
+			.p4(p4)
+			);
+
+		read_ram read(
+			.CLOCK_50(CLOCK_50),
+			.running(running),
+			.address(read_address),
+			.out(out),
+			.p1_count(p1_count),
+			.p2_count(p2_count),
+			.p3_count(p3_count),
+			.p4_count(p4_count),
+			.winner(winner)
+			);
+
 	///////
-
-  //wire [14:0] p1, p2, p3, p4;
-
-/*
-  game g(
-    .CLOCK_50(CLOCK_50),
-    .clonke(clonke),
-    .KEY_PRESSED(KEY_PRESSED),
-	 	.p1(p1),
-	 	.p2(p2),
-	 	.p3(p3),
-	 	.p4(p4)
-    );
-*/
 
   control c(
     .CLOCK_50(CLOCK_50),
@@ -196,8 +160,6 @@ module DE2Tron(
     .y(y),
     .colour(colour)
     );
-
-
 
   wire [2:0] colour;
   wire [7:0] x;

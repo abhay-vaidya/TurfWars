@@ -114,10 +114,11 @@ endmodule
 
 
 module directions(
-CLOCK_50,
+  CLOCK_50,
   KEY_PRESSED,
   p1d, p2d, p3d, p4d
   );
+  
   input CLOCK_50;
 
   input [4:0] KEY_PRESSED;
