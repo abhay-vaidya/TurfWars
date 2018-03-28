@@ -67,42 +67,25 @@ module DE2Tron(
 	///////
 
 	  wire [14:0] newp1, newp2, newp3, newp4;
-
-	  always@(posedge CLOCK_50)
-	    begin
-	      p1 = newp1;
-	      p2 = newp2;
-	      p3 = newp3;
-	      p4 = newp4;
-	    end
-
 	  move m(
 	    .clonke(clonke),
-	    .p1({p1a, p1d, p1}), // pass in player is alive, direction, and current location
-	    .p2({p2a, p2d, p2}),
-	    .p3({p3a, p3d, p3}),
-	    .p4({p4a, p4d, p4}),
+	    .p1({p1a, p1d}), // pass in player is alive, direction
+	    .p2({p2a, p2d}),
+	    .p3({p3a, p3d}),
+	    .p4({p4a, p4d}),
 	    .newp1(newp1), // updated locations
 	    .newp2(newp2),
 	    .newp3(newp3),
 	    .newp4(newp4)
 	    );
 
-	  wire [1:0] newp1d, newp2d, newp3d, newp4d;
-	  always@(posedge CLOCK_50)
-	    begin
-	      p1d = newp1d;
-	      p2d = newp2d;
-	      p3d = newp3d;
-	      p4d = newp4d;
-	    end
-
+		wire [2:0] p1d, p2d, p3d, p4d;
 	  directions d(
 	    .KEY_PRESSED(KEY_PRESSED),
-	    .p1d(newp1d),
-	    .p2d(newp2d),
-	    .p3d(newp3d),
-	    .p4d(newp4d)
+	    .p1d(p1d),
+	    .p2d(p2d),
+	    .p3d(p3d),
+	    .p4d(p4d)
 	    );
 
 	  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
@@ -118,15 +101,7 @@ module DE2Tron(
 	  	.q(out)
 	    );
 
-	  wire newp1a, newp2a, newp3a, newp4a;
-
-	  always@(posedge CLOCK_50)
-	    begin
-	      p1a = newp1a;
-	      p2a = newp2a;
-	      p3a = newp3a;
-	      p4a = newp4a;
-	    end
+	  wire p1a, p2a, p3a, p4a;
 
 	  ram_update update(
 	    .CLOCK_50(CLOCK_50),
@@ -135,36 +110,20 @@ module DE2Tron(
 	    .address(address),
 	    .out(out),
 	    .data(data),
-	    .p1({p1a, p1}),
-	    .p2({p2a, p2}),
-	    .p3({p3a, p3}),
-	    .p4({p4a, p4}),
-	    .p1a(newp1a),
-	    .p2a(newp2a),
-	    .p3a(newp3a),
-	    .p4a(newp4a)
+	    .p1(p1),
+	    .p2(p2),
+	    .p3(p3),
+	    .p4(p4),
+	    .p1a(p1a),
+	    .p2a(p2a),
+	    .p3a(p3a),
+	    .p4a(p4a)
 	    );
 	///////
 
   //wire [14:0] p1, p2, p3, p4;
 
-	reg [14:0] p1 = 15'b10011110_1110111; // start bottom right
-	reg [14:0] p2 = 15'b00000000_0000001; // start top left
-	reg [14:0] p3 = 15'b10011110_0000001; // start top right
-	reg [14:0] p4 = 15'b00000000_1110111; // start bottom left
-
-	// player directions
-  reg [1:0] p1d = 2'b00; // start moving up
-  reg [1:0] p2d = 2'b01; // start moving down
-  reg [1:0] p3d = 2'b10; // start moving left
-  reg [1:0] p4d = 2'b11; // start moving right
-
-	// player is alive
-  reg p1a = 1'b1;
-  reg p2a = 1'b1;
-  reg p3a = 1'b1;
-  reg p4a = 1'b1;
-
+/*
   game g(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
@@ -174,7 +133,7 @@ module DE2Tron(
 	 	.p3(p3),
 	 	.p4(p4)
     );
-
+*/
 
   control c(
     .CLOCK_50(CLOCK_50),

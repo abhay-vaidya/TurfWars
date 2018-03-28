@@ -118,8 +118,13 @@ module directions(
   p1d, p2d, p3d, p4d
   );
 
-  output reg [2:0] p1d, p2d, p3d, p4d;
   input [4:0] KEY_PRESSED;
+
+  // player directions
+  output reg [1:0] p1d = 2'b00; // start moving up
+  output reg [1:0] p2d = 2'b01; // start moving down
+  output reg [1:0] p3d = 2'b10; // start moving left
+  output reg [1:0] p4d = 2'b11; // start moving right
 
   always@(*)
     begin
@@ -158,37 +163,42 @@ module move(
 
   input clonke;
 
-  input [17:0] p1, p2, p3, p4; // p1[17] = alive/dead, [16:15] direction,  [14:0] {x, y}
-  output reg [14:0] newp1, newp2, newp3, newp4;
+  input [2:0] p1, p2, p3, p4; // p1[2] = alive/dead, [1:0] direction
+
+  output reg [14:0] newp1 = 15'b10011110_1110111; // start bottom right
+	output reg [14:0] newp2 = 15'b00000000_0000001; // start top left
+	output reg [14:0] newp3 = 15'b10011110_0000001; // start top right
+	output reg [14:0] newp4 = 15'b00000000_1110111; // start bottom left
+
 
   always@(posedge clonke)
     begin
-      if (p1[17])
-        case (p1[16:15])
+      if (p1[2])
+        case (p1[1:0])
           2'b00: newp1[6:0] <= newp1[6:0] - 1'b1;
           2'b01: newp1[6:0] <= newp1[6:0] + 1'b1;
           2'b10: newp1[14:7] <= newp1[14:7] - 1'b1;
           2'b11: newp1[14:7] <= newp1[14:7] + 1'b1;
         endcase
 
-      if (p2[17])
-        case (p2[16:15])
+      if (p2[2])
+        case (p2[1:0])
           2'b00: newp2[6:0] <= newp2[6:0] - 1'b1;
           2'b01: newp2[6:0] <= newp2[6:0] + 1'b1;
           2'b10: newp2[14:7] <= newp2[14:7] - 1'b1;
           2'b11: newp2[14:7] <= newp2[14:7] + 1'b1;
         endcase
 
-      if (p3[17])
-        case (p3[16:15])
+      if (p3[2])
+        case (p3[1:0])
           2'b00: newp3[6:0] <= newp3[6:0] - 1'b1;
           2'b01: newp3[6:0] <= newp3[6:0] + 1'b1;
           2'b10: newp3[14:7] <= newp3[14:7] - 1'b1;
           2'b11: newp3[14:7] <= newp3[14:7] + 1'b1;
         endcase
 
-      if (p4[17])
-        case (p4[16:15])
+      if (p4[2])
+        case (p4[1:0])
           2'b00: newp4[6:0] <= newp4[6:0] - 1'b1;
           2'b01: newp4[6:0] <= newp4[6:0] + 1'b1;
           2'b10: newp4[14:7] <= newp4[14:7] - 1'b1;
@@ -215,7 +225,7 @@ module ram_update(
   output reg p4a = 1'b1;
 
 
-  input [15:0] p1, p2, p3, p4; // p1[15] = alive or not, [14:0] {x, y}
+  input [14:0] p1, p2, p3, p4; //  [14:0] {x, y}
 
   input CLOCK_50, clonke;
 
@@ -286,7 +296,7 @@ module ram_update(
         write_p1: begin
           wren <= 1'b1;
           address[14:0] <= p1_curr[17:3];
-          if(p1[15])
+          if(p1a)
             case(p1_curr[2:0])
               3'b000:
                 begin
@@ -311,7 +321,7 @@ module ram_update(
         write_p2: begin
           wren <= 1'b1;
           address[14:0] <= p2_curr[17:3];
-          if(p2[15])
+          if(p2a)
             case(p2_curr[2:0])
               3'b000:
                 begin
@@ -336,7 +346,7 @@ module ram_update(
         write_p3: begin
           wren <= 1'b1;
           address[14:0] <= p3_curr[17:3];
-          if(p3[15])
+          if(p3a)
             case(p3_curr[2:0])
               3'b000:
                 begin
@@ -361,7 +371,7 @@ module ram_update(
         write_p4: begin
           wren <= 1'b1;
           address[14:0] <= p4_curr[17:3];
-          if(p4[15])
+          if(p4a)
             case(p4_curr[2:0])
               3'b000:
                 begin
