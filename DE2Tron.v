@@ -9,7 +9,7 @@ module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
     PS2_KBCLK,
     PS2_KBDAT,
-	 
+
 	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
@@ -22,14 +22,14 @@ module DE2Tron(
     VGA_G,         //    VGA Green[9:0]
     VGA_B         //    VGA Blue[9:0]
     );
-	 
+
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 	 /*
 	 hex_display h7(p4[14:11], HEX7[6:0]);
 	 hex_display h6(p4[10:7], HEX6[6:0]);
 	 hex_display h5(p4[6:4], HEX5[6:0]);
 	 hex_display h4(p4[3:0], HEX4[6:0]);
-	 
+
 	 hex_display h3(p2[14:11], HEX3[6:0]);
 	 hex_display h2(p2[10:7], HEX2[6:0]);
 	 hex_display h1(p2[6:4], HEX1[6:0]);
@@ -60,9 +60,9 @@ module DE2Tron(
 
   wire [4:0] KEY_PRESSED;
   wire clonke;
-  
-  wire [17:0] p1, p2, p3, p4;
-  
+
+  wire [14:0] p1, p2, p3, p4;
+
   /*
   always@(posedge clonke) begin
     p1 = p1 - 1'b1; // start bottom right, move up
@@ -70,11 +70,11 @@ module DE2Tron(
     //p3 = p3 - 8'b10000000;// start top right, move left
     //p4 = p4 + 8'b10000000; // start bottom left, move right
   end  */
-  
+
   //assign p3 = players.p3;
   //assign p4 = players.p4;
 
-  
+
   game g(
     .CLOCK_50(CLOCK_50),
     .clonke(clonke),
@@ -112,7 +112,7 @@ module DE2Tron(
     );
 
 
-  
+
   wire [2:0] colour;
   wire [7:0] x;
   wire [6:0] y;
