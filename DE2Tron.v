@@ -24,7 +24,7 @@ module DE2Tron(
     );
 
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
-	 /*
+	 
 	 hex_display h7(p4[14:11], HEX7[6:0]);
 	 hex_display h6(p4[10:7], HEX6[6:0]);
 	 hex_display h5(p4[6:4], HEX5[6:0]);
@@ -34,7 +34,7 @@ module DE2Tron(
 	 hex_display h2(p2[10:7], HEX2[6:0]);
 	 hex_display h1(p2[6:4], HEX1[6:0]);
 	 hex_display h0(p2[3:0], HEX0[6:0]);
-	 */
+	 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
 
@@ -62,7 +62,6 @@ module DE2Tron(
   wire clonke;
 
   wire [14:0] p1, p2, p3, p4;
-
   /*
   always@(posedge clonke) begin
     p1 = p1 - 1'b1; // start bottom right, move up
