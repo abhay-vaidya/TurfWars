@@ -14,10 +14,10 @@ module game(
   output reg [14:0] p4 = 15'b00000000_1110111; // start bottom left
 
   // player directions
-  reg p1d [1:0] = 2'b00; // start moving up
-  reg p2d [1:0] = 2'b01; // start moving down
-  reg p3d [1:0] = 2'b10; // start moving left
-  reg p4d [1:0] = 2'b11; // start moving right
+  reg [1:0] p1d = 2'b00; // start moving up
+  reg [1:0] p2d = 2'b01; // start moving down
+  reg [1:0] p3d = 2'b10; // start moving left
+  reg [1:0] p4d = 2'b11; // start moving right
 
   // player is alive
   reg p1a = 1'b1;
@@ -45,10 +45,10 @@ module game(
 
   directions d(
     .KEY_PRESSED(KEY_PRESSED),
-    .p1d(p1d),
-    .p2d(p2d),
-    .p3d(p3d),
-    .p4d(p4d)
+    .p1d(p1d[1:0]),
+    .p2d(p2d[1:0]),
+    .p3d(p3d[1:0]),
+    .p4d(p4d[1:0])
     );
 
   wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
