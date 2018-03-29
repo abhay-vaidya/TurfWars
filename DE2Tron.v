@@ -100,6 +100,7 @@ module DE2Tron(
 	  wire [14:0] p1, p2, p3, p4;
 	  move m(
 	    .clonke(clonke),
+		 .running(running),
 			.p1d(p1d),
 			.p2d(p2d),
 			.p3d(p3d),
@@ -134,14 +135,14 @@ module DE2Tron(
 	    );
 
 		wire running;
-		assign running = SW[0];
+		//assign running = SW[0];
 		wire [1:0] winner;
 
 		wire [14:0] p1_count, p2_count, p3_count, p4_count;
 		wire [14:0] write_address, read_address;
 		wire wren_write;
 
-		assign address[14:0] = running ? write_address : 15'b00000000_0000001;
+		assign address[14:0] = running ? write_address : 15'b10011001_0000010;
 		assign wren = running; // ? wren_write : 1'b0;
 
 		wire ramclk;
@@ -173,30 +174,37 @@ module DE2Tron(
 
 	///////
 
-  control c(
-    .CLOCK_50(CLOCK_50),
-    .ld_p1(ld_p1),
-    .ld_p2(ld_p2),
-    .ld_p3(ld_p3),
-    .ld_p4(ld_p4)
-    );
-
-  wire ld_p1, ld_p2, ld_p3, ld_p4;
-
-  datapath dp(
+    control c(
     .CLOCK_50(CLOCK_50),
     .ld_p1(ld_p1),
     .ld_p2(ld_p2),
     .ld_p3(ld_p3),
     .ld_p4(ld_p4),
+	 .ld_timer(ld_timer)
+    );
+
+  wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
+
+  datapath dp(
+    .CLOCK_50(CLOCK_50),
+	 .clonke(clonke),
+	 .timer(timer),
+    .ld_p1(ld_p1),
+    .ld_p2(ld_p2),
+    .ld_p3(ld_p3),
+    .ld_p4(ld_p4),
+	 .ld_timer(ld_timer),
     .p1(p1[14:0]),
     .p2(p2[14:0]),
     .p3(p3[14:0]),
     .p4(p4[14:0]),
     .x(x),
     .y(y),
-    .colour(colour)
+    .colour(colour),
+	 .running(running)
     );
+
+
 
   wire [2:0] colour;
   wire [7:0] x;
@@ -263,22 +271,23 @@ endmodule
 
 
 module datapath(
-  CLOCK_50,
-  ld_p1, ld_p2, ld_p3, ld_p4,
+  CLOCK_50, clonke, timer,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer,
   p1, p2, p3, p4,
   x, y,
-  colour
+  colour, running
   );
 
-  input CLOCK_50;
-  input ld_p1, ld_p2, ld_p3, ld_p4;
+  input CLOCK_50, clonke, timer;
+  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
 
   input [14:0] p1, p2, p3, p4; // location information for players
 
   output reg [7:0] x;
   output reg [6:0] y;
   output reg [2:0] colour;
-
+  output reg running = 1;
+  reg [7:0] timer_x;
   always@(posedge CLOCK_50)
   begin
 
@@ -309,26 +318,39 @@ module datapath(
         y <= p4[6:0];
         colour <= 3'b110;
       end
-
+	else if (ld_timer)
+		begin
+			x <= timer_x;
+			y <= 7'b1110111;
+			colour <= 3'b111;
+		end
   end
+  
+  always@(posedge timer)
+	begin
+		if (timer_x >= 8'bb10011110)
+			running <= 0;
+		timer_x <= timer_x + 1'b1;
+	end
 
 endmodule
 
 
 module control(
   CLOCK_50,
-  ld_p1, ld_p2, ld_p3, ld_p4
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer
   );
 
   input CLOCK_50;
-  output reg ld_p1, ld_p2, ld_p3, ld_p4;
+  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
 
   reg [4:0] current_state, next_state;
 
   localparam  DRAW_P1 = 5'd0,
               DRAW_P2 = 5'd1,
               DRAW_P3 = 5'd2,
-              DRAW_P4 = 5'd3;
+              DRAW_P4 = 5'd3,
+				  DRAW_TIMER = 5'd4;
 
   always@(*)
   begin: state_table
@@ -336,7 +358,8 @@ module control(
       DRAW_P1 : next_state = DRAW_P2;
       DRAW_P2 : next_state = DRAW_P3;
       DRAW_P3 : next_state = DRAW_P4;
-      DRAW_P4 : next_state = DRAW_P1;
+      DRAW_P4 : next_state = DRAW_TIMER;
+		DRAW_TIMER : next_state = DRAW_P1;
       default : next_state = DRAW_P1;
     endcase
   end
@@ -347,6 +370,7 @@ module control(
     ld_p2 = 0;
     ld_p3 = 0;
     ld_p4 = 0;
+	 ld_timer = 0;
     case (current_state)
       DRAW_P1 : begin
           ld_p1 = 1;
@@ -360,6 +384,9 @@ module control(
       DRAW_P4 : begin
           ld_p4 = 1;
         end
+	   DRAW_TIMER : begin
+			 ld_timer = 1;
+		  end
     endcase
   end
 
