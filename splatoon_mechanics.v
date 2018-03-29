@@ -49,149 +49,50 @@ endmodule
 
 
 module move(
-  clonke, running,
+  clonke,
   p1d, p2d, p3d, p4d,
   p1, p2, p3, p4
   );
 
-  input clonke, running;
+  input clonke;
   input [1:0] p1d, p2d, p3d, p4d;
 
   output reg [14:0] p1, p2, p3, p4;
 
   initial begin
-	  p1 <= 15'b10011101_1110110;
-	  p2 <= 15'b00000001_0000010;
-	  p3 <= 15'b10011101_0000010;
-	  p4 <= 15'b00000001_1110110;
+    p1 <= 15'b10011110_1110111;
+    p2 <= 15'b00000000_0000001;
+    p3 <= 15'b10011110_0000001;
+    p4 <= 15'b00000000_1110111;
   end
 
-	  always@(posedge clonke)
-	  begin
-		if(running)
-			begin
-			case(p1d)
-			  2'b00: 
-					begin
-						if(p1[6:0] == 7'b0000010)
-							p1[6:0] <= 7'b1110110;
-						else
-							p1[6:0] <= p1[6:0] - 1'b1;
-					end
-			  2'b01: 
-					begin
-						if(p1[6:0] == 7'b1110110)
-							p1[6:0] <= 7'b0000010;
-						else
-							p1[6:0] <= p1[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin	
-						if(p1[14:7] == 8'b00000001)
-							p1[14:7] <= 8'b10011101;
-						else
-							p1[14:7] <= p1[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin	
-						if(p1[14:7] == 8'b10011101)
-							p1[14:7] <= 8'b00000001;
-						else
-							p1[14:7] <= p1[14:7] + 1'b1;
-					end
-			endcase
-			case(p2d)
-			  2'b00: 
-					begin
-						if(p2[6:0] == 7'b0000010)
-							p2[6:0] <= 7'b1110110;
-						else
-							p2[6:0] <= p2[6:0] - 1'b1;
-					end
-			  2'b01: 
-					begin
-						if(p2[6:0] == 7'b1110110)
-							p2[6:0] <= 7'b0000010;
-						else
-							p2[6:0] <= p2[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin	
-						if(p2[14:7] == 8'b00000001)
-							p2[14:7] <= 8'b10011101;
-						else
-							p2[14:7] <= p2[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin	
-						if(p2[14:7] == 8'b10011101)
-							p2[14:7] <= 8'b00000001;
-						else
-							p2[14:7] <= p2[14:7] + 1'b1;
-					end
-			endcase
-			case(p3d)
-			  2'b00: 
-					begin
-						if(p3[6:0] == 7'b0000010)
-							p3[6:0] <= 7'b1110110;
-						else
-							p3[6:0] <= p3[6:0] - 1'b1;
-					end
-			  2'b01: 
-					begin
-						if(p3[6:0] == 7'b1110110)
-							p3[6:0] <= 7'b0000010;
-						else
-							p3[6:0] <= p3[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin	
-						if(p3[14:7] == 8'b00000001)
-							p3[14:7] <= 8'b10011101;
-						else
-							p3[14:7] <= p3[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin	
-						if(p3[14:7] == 8'b10011101)
-							p3[14:7] <= 8'b00000001;
-						else
-							p3[14:7] <= p3[14:7] + 1'b1;
-					end
-			endcase
-			case(p4d)
-			  2'b00: 
-					begin
-						if(p4[6:0] == 7'b0000010)
-							p4[6:0] <= 7'b1110110;
-						else
-							p4[6:0] <= p4[6:0] - 1'b1;
-					end
-			  2'b01: 
-					begin
-						if(p4[6:0] == 7'b1110110)
-							p4[6:0] <= 7'b0000010;
-						else
-							p4[6:0] <= p4[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin	
-						if(p4[14:7] == 8'b00000001)
-							p4[14:7] <= 8'b10011101;
-						else
-							p4[14:7] <= p4[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin	
-						if(p4[14:7] == 8'b10011101)
-							p4[14:7] <= 8'b00000001;
-						else
-							p4[14:7] <= p4[14:7] + 1'b1;
-					end
-			endcase
-		  end
-	  end
+  always@(posedge clonke)
+    begin
+      case (p1d)
+        2'b00: p1[6:0]  <= p1[6:0] - 1'b1;
+        2'b01: p1[6:0]  <= p1[6:0] + 1'b1;
+        2'b10: p1[14:7] <= p1[14:7] - 1'b1;
+        2'b11: p1[14:7] <= p1[14:7] + 1'b1;
+      endcase
+      case (p2d)
+        2'b00: p2[6:0]  <= p2[6:0] - 1'b1;
+        2'b01: p2[6:0]  <= p2[6:0] + 1'b1;
+        2'b10: p2[14:7] <= p2[14:7] - 1'b1;
+        2'b11: p2[14:7] <= p2[14:7] + 1'b1;
+      endcase
+      case (p3d)
+        2'b00: p3[6:0]  <= p3[6:0] - 1'b1;
+        2'b01: p3[6:0]  <= p3[6:0] + 1'b1;
+        2'b10: p3[14:7] <= p3[14:7] - 1'b1;
+        2'b11: p3[14:7] <= p3[14:7] + 1'b1;
+      endcase
+      case (p4d)
+        2'b00: p4[6:0]  <= p4[6:0] - 1'b1;
+        2'b01: p4[6:0]  <= p4[6:0] + 1'b1;
+        2'b10: p4[14:7] <= p4[14:7] - 1'b1;
+        2'b11: p4[14:7] <= p4[14:7] + 1'b1;
+      endcase
+    end
 
 endmodule
 
@@ -199,7 +100,6 @@ endmodule
 module write_ram(
   clock25,
   running,
-  wren,
   address,
   data,
   p1, p2, p3, p4
@@ -209,7 +109,6 @@ module write_ram(
 
   input [14:0] p1, p2, p3, p4;
 
-  output reg wren;
   output reg [14:0] address;
   output reg [2:0] data;
 
@@ -219,7 +118,8 @@ module write_ram(
               WRITE_P1 = 3'd1,
               WRITE_P2 = 3'd2,
               WRITE_P3 = 3'd3,
-              WRITE_P4 = 3'd4;
+              WRITE_P4 = 3'd4,
+              READ_WAIT = 3'd5;
 
   /*
   start -> running ? (write1, write2, write3, write4 -> start) , start
@@ -232,7 +132,8 @@ module write_ram(
         WRITE_P1 : next_state = WRITE_P2;
         WRITE_P2 : next_state = WRITE_P3;
         WRITE_P3 : next_state = WRITE_P4;
-        WRITE_P4 : next_state = START;
+        WRITE_P4 : next_state = running ? START : READ_WAIT;
+        READ_WAIT : next_state = START;
         default : next_state = START;
       endcase
     end
@@ -241,27 +142,26 @@ module write_ram(
     begin
       case (current_state)
         START : begin
-            wren <= 1'b0;
+            address[14:0] <= 0;
           end
         WRITE_P1 : begin
-            wren <= 1'b1;
             address[14:0] <= p1[14:0];
             data <= 3'b001;
           end
         WRITE_P2 : begin
-            wren <= 1'b1;
             address[14:0] <= p2[14:0];
             data <= 3'b010;
           end
         WRITE_P3 : begin
-            wren <= 1'b1;
             address[14:0] <= p3[14:0];
             data <= 3'b100;
           end
         WRITE_P4 : begin
-            wren <= 1'b1;
             address[14:0] <= p4[14:0];
             data <= 3'b110;
+          end
+        READ_WAIT : begin
+            address[14:0] <= 0;
           end
       endcase
     end
@@ -288,42 +188,45 @@ module read_ram(
   input [2:0] out;
 
   output reg [1:0] winner;
+
   output reg [14:0] address;
 
   output reg [14:0] p1_count, p2_count, p3_count, p4_count;
-  
-  initial begin
-   address = 0;
-	p1_count = 0;
-	p2_count = 0;
-	p3_count = 0;
-	p4_count = 0;
-  end
 
-  reg [1:0] current_state, next_state;
+  reg [3:0] current_state, next_state;
 
-  wire done;
-  assign done = address > 15'b10011110_1110111;
+  wire done, go;
+  assign done = address > 15'b10011110_1111111;
+  assign go = !running && !done;
 
-  localparam  START = 2'd0,
-              READ = 2'd1,
-              INCREMENT = 2'd2;
+  localparam  START = 3'd0,
+              READ = 3'd1,
+              INCREMENT = 3'd2,
+              COUNT = 3'd3,
+              WINNER = 3'd4;;
 
   always@(*)
     begin: state_table
       case (current_state)
-        START : next_state = running ? START : READ;
-        READ : next_state = INCREMENT;
-        INCREMENT : next_state = START;
+        START : next_state = go ? READ : START;
+        READ : next_state = COUNT;
+        COUNT : next_state = INCREMENT;
+        INCREMENT : next_state = done ? WINNER : START;
+        WINNER : next_state = START;
         default : next_state = START;
       endcase
     end
+
+  reg [2:0] curr;
 
   always@(*)
     begin
       case (current_state)
         READ : begin
-            case (out)
+            curr[2:0] <= out[2:0];
+          end
+        COUNT : begin
+            case (curr)
               3'b001: p1_count <= p1_count + 1'b1;
               3'b010: p2_count <= p2_count + 1'b1;
               3'b100: p3_count <= p3_count + 1'b1;
@@ -333,18 +236,7 @@ module read_ram(
         INCREMENT : begin
             address[14:0] <= address[14:0] + 1'b1;
           end
-      endcase
-    end
-
-  always@(posedge clock25)
-    begin
-      current_state <= next_state;
-    end
-
-  always@(*)
-    begin
-      if (done)
-        begin
+        WINNER : begin
           if (p1_count >= p2_count)
             if (p1_count >= p3_count)
               if (p1_count >= p4_count)
@@ -361,7 +253,13 @@ module read_ram(
             if (p4_count >= p2_count)
               if (p4_count >= p3_count)
                 winner <= 2'b11;
-        end
+          end
+      endcase
+    end
+
+  always@(posedge clock25)
+    begin
+      current_state <= next_state;
     end
 
 endmodule

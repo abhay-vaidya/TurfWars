@@ -62,9 +62,9 @@ module DE2Tron(
 	 hex_display h5(address[6:3], HEX5[6:0]);
 	 hex_display h4(address[2:0], HEX4[6:0]);
 
-	 //hex_display h3(p1_count[14:11], HEX3[6:0]);
-	 //hex_display h2(p1_count[10:7], HEX2[6:0]);
-	 //hex_display h1(p1_count[6:4], HEX1[6:0]);
+	 hex_display h3(p1_count[14:11], HEX3[6:0]);
+	 hex_display h2(p1_count[10:7], HEX2[6:0]);
+	 hex_display h1(p1_count[6:4], HEX1[6:0]);
 	 hex_display h0(out[2:0], HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
@@ -151,7 +151,6 @@ module DE2Tron(
 		write_ram write(
 			.clock25(clock25),
 			.running(running),
-			.wren(wren_write),
 			.address(write_address),
 			.data(data),
 			.p1(p1),
@@ -325,7 +324,7 @@ module datapath(
 			colour <= 3'b111;
 		end
   end
-  
+
   always@(posedge timer)
 	begin
 		if (timer_x >= 8'bb10011110)
