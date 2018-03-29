@@ -98,7 +98,7 @@ endmodule
 
 
 module write_ram(
-  CLOCK_50,
+  clock25,
   running,
   wren,
   address,
@@ -106,7 +106,7 @@ module write_ram(
   p1, p2, p3, p4
   );
 
-  input CLOCK_50, running;
+  input clock25, running;
 
   input [14:0] p1, p2, p3, p4;
 
@@ -167,7 +167,7 @@ module write_ram(
       endcase
     end
 
-  always@(posedge CLOCK_50)
+  always@(posedge clock25)
     begin
       current_state <= next_state;
     end
@@ -176,7 +176,7 @@ endmodule
 
 
 module read_ram(
-  CLOCK_50,
+  clock25,
   running,
   address,
   out,
@@ -184,7 +184,7 @@ module read_ram(
   winner
   );
 
-  input CLOCK_50, running;
+  input clock25, running;
 
   input [2:0] out;
 
@@ -192,21 +192,28 @@ module read_ram(
   output reg [14:0] address;
 
   output reg [14:0] p1_count, p2_count, p3_count, p4_count;
+  
+  initial begin
+   address = 0;
+	p1_count = 0;
+	p2_count = 0;
+	p3_count = 0;
+	p4_count = 0;
+  end
 
   reg [1:0] current_state, next_state;
+
+  wire done;
+  assign done = address > 15'b10011110_1110111;
 
   localparam  START = 2'd0,
               READ = 2'd1,
               INCREMENT = 2'd2;
 
-  reg done;
-  wire go;
-  assign go = !running && !done;
-
   always@(*)
     begin: state_table
       case (current_state)
-        START : next_state = go ? READ : START;
+        START : next_state = running ? START : READ;
         READ : next_state = INCREMENT;
         INCREMENT : next_state = START;
         default : next_state = START;
@@ -217,17 +224,12 @@ module read_ram(
     begin
       case (current_state)
         READ : begin
-
-            if (address >= 15'b10011110_1110111)
-              done <= 1;
-
             case (out)
               3'b001: p1_count <= p1_count + 1'b1;
               3'b010: p2_count <= p2_count + 1'b1;
               3'b100: p3_count <= p3_count + 1'b1;
               3'b110: p4_count <= p4_count + 1'b1;
             endcase
-
           end
         INCREMENT : begin
             address[14:0] <= address[14:0] + 1'b1;
@@ -235,7 +237,7 @@ module read_ram(
       endcase
     end
 
-  always@(posedge CLOCK_50)
+  always@(posedge clock25)
     begin
       current_state <= next_state;
     end
@@ -338,26 +340,38 @@ module old_read(
 
 endmodule
 
-module RateDivider(CLOCK_50, clonke);
+module RateDivider(CLOCK_50, clock25, clonke, timer);
 
   input CLOCK_50;
-  output clonke;
-  reg [27:0] load;
-  reg [27:0] counter;
+  output clock25, clonke, timer;
+  reg [27:0] load1, load2, load3;
+  reg [27:0] counter1, counter2, counter3;
 
   //assign counter = 28'b0000000000000000000000000000;
   initial
 	begin // 10hz
-		load = 28'd1249999;//28'd12499999;
+		load1 = 28'd1249999;//28'd12499999;
+		load2 = 28'd37499999;
+		load3 = 28'd3;
 	end
   always@(posedge CLOCK_50)
     begin
-      if (counter == 0)
-        counter <= load;
+      if (counter1 == 0)
+        counter1 <= load1;
       else
-        counter <= counter - 1'b1;
+        counter1 <= counter1 - 1'b1;
+	   if (counter2 == 0)
+			counter2 <= load2;
+		else
+			counter2 <= counter2 - 1'b1;
+	   if (counter3 == 0)
+			counter3 <= load3;
+		else
+			counter3 <= counter3 - 1'b1;
     end
 
-  assign clonke = (counter == 0) ? 1 : 0; //_____|_____|_____
+  assign clonke = (counter1 == 0) ? 1 : 0; //_____|_____|_____
+  assign timer = (counter2 == 0) ? 1 : 0;
+  assign clock25 = (counter3 == 0) ? 1 : 0;
 
 endmodule

@@ -24,7 +24,36 @@ module DE2Tron(
     VGA_G,         //    VGA Green[9:0]
     VGA_B         //    VGA Blue[9:0]
     );
+/*
+	 reg [2:0] lol [32767:0];
+	 integer i,j;
+	 always@(*)
+	 begin
+		  for (i=1;i<5000; i=i+1)
+            lol[i] <= 1;
+		  for (i=5001;i<10000; i=i+1)
+			lol[i] <= 2;
+		  for (i=10001;i<15000; i=i+1)
+			lol[i] <= 3;
+		  for (i=15001;i<20000; i=i+1)
+			lol[i] <= 4;
+		  for (i=20001;i<25000; i=i+1)
+			lol[i] <= 5;
+		  for (i=25001;i<30000; i=i+1)
+			lol[i] <= 6;
+		  for (i=30001;i<32767; i=i+1)
+			lol[i] <= 7;
 
+	 end
+	 
+	 wire lmfao;
+	 assign lmfao = lol[j];
+		
+	 always@(posedge CLOCK_50)
+	 begin
+		j = j+ 1;
+	 end
+	 */
 	 input [1:0] SW;
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
@@ -32,12 +61,12 @@ module DE2Tron(
 	 hex_display h6(address[10:7], HEX6[6:0]);
 	 hex_display h5(address[6:3], HEX5[6:0]);
 	 hex_display h4(address[2:0], HEX4[6:0]);
-/*
-	 hex_display h3(p2[14:11], HEX3[6:0]);
-	 hex_display h2(p2[10:7], HEX2[6:0]);
-	 hex_display h1(p2[6:4], HEX1[6:0]);
-	 hex_display h0(p2[3:0], HEX0[6:0]);
-*/
+
+	 hex_display h3(p1_count[14:11], HEX3[6:0]);
+	 hex_display h2(p1_count[10:7], HEX2[6:0]);
+	 hex_display h1(p1_count[6:4], HEX1[6:0]);
+	 hex_display h0(p1_count[3:0], HEX0[6:0]);
+
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
 
@@ -62,9 +91,9 @@ module DE2Tron(
     );
 
   wire [4:0] KEY_PRESSED;
-  wire clonke;
+  wire clock25, clonke, timer;
 
-	RateDivider div(CLOCK_50, clonke);
+	RateDivider div(CLOCK_50, clock25, clonke, timer);
 
 	///////
 
@@ -116,7 +145,7 @@ module DE2Tron(
 		assign wren = running ? wren_write : 1'b0;
 
 		write_ram write(
-			.CLOCK_50(CLOCK_50),
+			.clock25(clock25),
 			.running(running),
 			.wren(wren_write),
 			.address(write_address),
@@ -128,7 +157,7 @@ module DE2Tron(
 			);
 
 		read_ram read(
-			.CLOCK_50(CLOCK_50),
+			.clock25(clock25),
 			.running(running),
 			.address(read_address),
 			.out(out),
