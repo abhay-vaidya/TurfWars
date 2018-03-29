@@ -57,15 +57,15 @@ module DE2Tron(
 	 input [1:0] SW, KEY;
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
-	 hex_display h7(address[14:11], HEX7[6:0]);
-	 hex_display h6(address[10:7], HEX6[6:0]);
-	 hex_display h5(address[6:3], HEX5[6:0]);
-	 hex_display h4(address[2:0], HEX4[6:0]);
+	 hex_display h7(address[14:12], HEX7[6:0]);
+	 hex_display h6(address[11:8], HEX6[6:0]);
+	 hex_display h5(address[7:4], HEX5[6:0]);
+	 hex_display h4(address[3:0], HEX4[6:0]);
 
-	 hex_display h3(p1_count[14:11], HEX3[6:0]);
-	 hex_display h2(p1_count[10:7], HEX2[6:0]);
-	 hex_display h1(p1_count[6:4], HEX1[6:0]);
-	 hex_display h0(out[2:0], HEX0[6:0]);
+	 hex_display h3(address1[14:12], HEX3[6:0]);
+	 hex_display h2(address1[11:8], HEX2[6:0]);
+	 hex_display h1(address1[7:4], HEX1[6:0]);
+	 hex_display h0(address1[3:0], HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
@@ -122,7 +122,7 @@ module DE2Tron(
 	    );
 
 	  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
-	  wire [14:0] address; // 15 bits, 8 X bits, 7 Y bits
+	  wire [14:0] address, address1; // 15 bits, 8 X bits, 7 Y bits
 	  wire [2:0] out; // data in the ram at the given address (3 bits)
 	  wire [2:0] data; // data to be written (3 bits)
 
@@ -142,7 +142,9 @@ module DE2Tron(
 		wire [14:0] write_address, read_address;
 		wire wren_write;
 
-		assign address[14:0] = running ? write_address : 15'b10011001_0000010;
+		assign address[14:0] = write_address;
+		assign address1[14:0] = read_address;
+		
 		assign wren = running; // ? wren_write : 1'b0;
 
 		wire ramclk;
