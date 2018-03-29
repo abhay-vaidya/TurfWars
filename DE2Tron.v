@@ -10,7 +10,7 @@ module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
     PS2_KBCLK,
     PS2_KBDAT,
-	 SW,
+	 SW, KEY,
 
 	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
@@ -45,16 +45,16 @@ module DE2Tron(
 			lol[i] <= 7;
 
 	 end
-	 
+
 	 wire lmfao;
 	 assign lmfao = lol[j];
-		
+
 	 always@(posedge CLOCK_50)
 	 begin
 		j = j+ 1;
 	 end
 	 */
-	 input [1:0] SW;
+	 input [1:0] SW, KEY;
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 	 hex_display h7(address[14:11], HEX7[6:0]);
@@ -62,10 +62,10 @@ module DE2Tron(
 	 hex_display h5(address[6:3], HEX5[6:0]);
 	 hex_display h4(address[2:0], HEX4[6:0]);
 
-	 hex_display h3(p1_count[14:11], HEX3[6:0]);
-	 hex_display h2(p1_count[10:7], HEX2[6:0]);
-	 hex_display h1(p1_count[6:4], HEX1[6:0]);
-	 hex_display h0(p1_count[3:0], HEX0[6:0]);
+	 //hex_display h3(p1_count[14:11], HEX3[6:0]);
+	 //hex_display h2(p1_count[10:7], HEX2[6:0]);
+	 //hex_display h1(p1_count[6:4], HEX1[6:0]);
+	 hex_display h0(out[2:0], HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
@@ -127,7 +127,7 @@ module DE2Tron(
 
 	  ram32768x3 ram(
 	    .address(address),
-	  	.clock(CLOCK_50),
+	  	.clock(ramclk),
 	  	.data(data),
 	  	.wren(wren),
 	  	.q(out)
@@ -141,8 +141,11 @@ module DE2Tron(
 		wire [14:0] write_address, read_address;
 		wire wren_write;
 
-		assign address[14:0] = running ? write_address : read_address;
-		assign wren = running ? wren_write : 1'b0;
+		assign address[14:0] = running ? write_address : 15'b00000000_0000001;
+		assign wren = running; // ? wren_write : 1'b0;
+
+		wire ramclk;
+		assign ramclk = running ? clock25 : KEY[0];
 
 		write_ram write(
 			.clock25(clock25),
