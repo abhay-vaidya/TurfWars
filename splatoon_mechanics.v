@@ -442,7 +442,7 @@ module read_ram(
               READ = 3'd1,
               INCREMENT = 3'd2,
               COUNT = 3'd3,
-              WINNER = 3'd4;;
+              WINNER = 3'd4;
 
   always@(*)
     begin: state_table

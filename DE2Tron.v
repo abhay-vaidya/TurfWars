@@ -140,7 +140,7 @@ module DE2Tron(
 		//assign running = SW[0];
 
 
-		ram_update update(
+		update_ram update(
 			.clock25(clock25),
 			.running(running),
 			.address(address),
