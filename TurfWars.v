@@ -147,7 +147,6 @@ module DE2Tron(
 
   control c(
   .CLOCK_50(CLOCK_50),
-  .clonke(clonke),
  .running(running),
   .ld_p1(ld_p1),
   .ld_p2(ld_p2),
@@ -349,15 +348,13 @@ endmodule
 
 
 module control(
-CLOCK_50, clonke,
+CLOCK_50,
 ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
 running, done
 );
 
-input CLOCK_50, clonke, running, done;
+input CLOCK_50, running, done;
 output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state;
-
-wire clock;
 
 reg [4:0] current_state, next_state;
 
@@ -386,7 +383,6 @@ begin: state_table
 end
 
 always@(*)
-clock = CLOCK_50;
 begin: enable_signals
   ld_p1 = 0;
   ld_p2 = 0;
@@ -413,10 +409,8 @@ begin: enable_signals
      ld_timer = 1;
     end
   RESET : begin
-      clock = clonke;
       reset_state = 1;
     end
-    clock = clonke;
    RESET_INCREMENT : begin
      reset_inc_state = 1;
     end
@@ -426,7 +420,7 @@ begin: enable_signals
   endcase
 end
 
-always@(posedge clock)
+always@(posedge CLOCK_50)
 begin: state_FFS
   current_state <= next_state;
 end
