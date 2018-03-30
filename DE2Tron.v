@@ -62,10 +62,10 @@ module DE2Tron(
 	 hex_display h5(address[7:4], HEX5[6:0]);
 	 hex_display h4(address[3:0], HEX4[6:0]);
 
-	 hex_display h3(address1[14:12], HEX3[6:0]);
-	 hex_display h2(address1[11:8], HEX2[6:0]);
-	 hex_display h1(address1[7:4], HEX1[6:0]);
-	 hex_display h0(address1[3:0], HEX0[6:0]);
+	 hex_display h3(p1_count[14:12], HEX3[6:0]);
+	 hex_display h2(p1_count[11:8], HEX2[6:0]);
+	 hex_display h1(p1_count[7:4], HEX1[6:0]);
+	 hex_display h0(p1_count[3:0], HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
@@ -122,33 +122,56 @@ module DE2Tron(
 	    );
 
 	  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
-	  wire [14:0] address, address1; // 15 bits, 8 X bits, 7 Y bits
+	  wire [14:0] address;//, address1; // 15 bits, 8 X bits, 7 Y bits
 	  wire [2:0] out; // data in the ram at the given address (3 bits)
 	  wire [2:0] data; // data to be written (3 bits)
 
 	  ram32768x3 ram(
 	    .address(address),
-	  	.clock(ramclk),
+	  	.clock(CLOCK_50),
 	  	.data(data),
 	  	.wren(wren),
 	  	.q(out)
 	    );
 
+		wire [1:0] winner;
+		wire [14:0] p1_count, p2_count, p3_count, p4_count;
 		wire running;
 		//assign running = SW[0];
-		wire [1:0] winner;
 
-		wire [14:0] p1_count, p2_count, p3_count, p4_count;
-		wire [14:0] write_address, read_address;
-		wire wren_write;
 
-		assign address[14:0] = write_address;
-		assign address1[14:0] = read_address;
-		
-		assign wren = running; // ? wren_write : 1'b0;
+		ram_update update(
+			.clock25(clock25),
+			.running(running),
+			.address(address),
+			.wren(wren),
+			.data_to_ram(data),
+			.ram_output(out),
+			.p1(p1),
+			.p2(p2),
+			.p3(p3),
+			.p4(p4),
+			.p1_count(p1_count),
+			.p2_count(p2_count),
+			.p3_count(p3_count),
+			.p4_count(p4_count),
+			.winner(winner)
+			);
 
-		wire ramclk;
-		assign ramclk = running ? clock25 : KEY[0];
+
+		//wire [14:0] write_address, read_address;
+		//wire wren_write;
+
+		//assign address[14:0] = write_address;
+		//assign address1[14:0] = read_address;
+
+		//assign wren = running; // ? wren_write : 1'b0;
+
+		//wire ramclk;
+		//assign ramclk = running ? clock25 : KEY[0];
+
+
+/*
 
 		write_ram write(
 			.clock25(clock25),
@@ -172,6 +195,7 @@ module DE2Tron(
 			.p4_count(p4_count),
 			.winner(winner)
 			);
+			*/
 
 	///////
 

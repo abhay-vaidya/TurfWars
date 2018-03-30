@@ -196,6 +196,146 @@ module move(
 endmodule
 
 
+module update_ram(
+  clock25,
+  running,
+  address,
+  wren,
+  data_to_ram,
+  ram_output,
+  p1, p2, p3, p4,
+  p1_count, p2_count, p3_count, p4_count,
+  winner
+  );
+
+  input clock25, running;
+
+  output reg [14:0] address;
+  output reg wren;
+
+  output reg [2:0] data_to_ram;
+
+  input [2:0] ram_output;
+
+  input [14:0] p1, p2, p3, p4;
+
+  output reg [14:0] p1_count, p2_count, p3_count, p4_count;
+
+  output reg [1:0] winner;
+
+  reg [2:0] curr;
+
+  /*
+  start_write -> running ? writep1 : start_read
+  writep1 -> writep2 -> writep3 -> writep4 -> start_write
+  start_read (address = 0) -> read -> count
+  count (increments address, counts) -> done ? winner : read
+  winner -> end
+  end -> end
+  */
+
+  wire done;
+  assign done = address[14:0] > 15'b10011110_1111111;
+
+  reg [3:0] current_state, next_state;
+
+  localparam  START_WRITE = 4'd0,
+              WRITE_P1    = 4'd1,
+              WRITE_P2    = 4'd2,
+              WRITE_P3    = 4'd3,
+              WRITE_P4    = 4'd4,
+              START_READ  = 4'd5,
+              READ        = 4'd6,
+              COUNT       = 4'd7,
+              WINNER      = 4'd8,
+              END         = 4'd9;
+
+  always@(*)
+    begin: state_table
+      case (current_state)
+      START_WRITE : next_state = running ? WRITE_P1 : START_READ;
+      WRITE_P1 :    next_state = WRITE_P2;
+      WRITE_P2 :    next_state = WRITE_P3;
+      WRITE_P3 :    next_state = WRITE_P4;
+      WRITE_P4 :    next_state = START_WRITE;
+      START_READ :  next_state = READ;
+      READ :        next_state = COUNT;
+      COUNT :       next_state = done ? WINNER : READ;
+      WINNER :      next_state = END;
+      END :         next_state = END;
+      default :     next_state = START_WRITE;
+      endcase
+    end
+
+  always@(*)
+    begin
+      case (current_state)
+        //START_WRITE : begin
+          //end
+        WRITE_P1 : begin
+            wren <= 1'b1;
+            address[14:0] <= p1[14:0];
+            data_to_ram <= 3'b001;
+          end
+        WRITE_P2 : begin
+            address[14:0] <= p2[14:0];
+            data_to_ram <= 3'b010;
+          end
+        WRITE_P3 : begin
+            address[14:0] <= p3[14:0];
+            data_to_ram <= 3'b100;
+          end
+        WRITE_P4 : begin
+            address[14:0] <= p4[14:0];
+            data_to_ram <= 3'b110;
+          end
+        START_READ : begin
+            wren <= 1'b0;
+            address[14:0] <= 0; //reset address
+          end
+        READ : begin
+            curr[2:0] <= ram_output[2:0]; // read ram out
+          end
+        COUNT : begin
+            address[14:0] <= address[14:0] + 1'b1; // increment address
+            case (curr)
+              3'b001: p1_count <= p1_count + 1'b1;
+              3'b010: p2_count <= p2_count + 1'b1;
+              3'b100: p3_count <= p3_count + 1'b1;
+              3'b110: p4_count <= p4_count + 1'b1;
+            endcase
+          end
+        WINNER : begin
+            if (p1_count >= p2_count)
+              if (p1_count >= p3_count)
+                if (p1_count >= p4_count)
+                  winner <= 2'b00; // p1
+            if (p2_count >= p1_count)
+              if (p2_count >= p3_count)
+                if (p2_count >= p4_count)
+                  winner <= 2'b01;
+            if (p3_count >= p1_count)
+              if (p3_count >= p2_count)
+                if (p3_count >= p4_count)
+                  winner <= 2'b10;
+            if (p4_count >= p1_count)
+              if (p4_count >= p2_count)
+                if (p4_count >= p3_count)
+                  winner <= 2'b11;
+          end
+        //END : begin
+          //end
+      endcase
+    end
+
+  always@(posedge clock25)
+    begin
+      current_state <= next_state;
+    end
+
+endmodule
+
+
 module write_ram(
   clock25,
   running,
@@ -302,7 +442,7 @@ module read_ram(
               READ = 3'd1,
               INCREMENT = 3'd2,
               COUNT = 3'd3,
-              WINNER = 3'd4;
+              WINNER = 3'd4;;
 
   always@(*)
     begin: state_table
