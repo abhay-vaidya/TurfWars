@@ -154,12 +154,21 @@ module DE2Tron(
   .ld_p4(ld_p4),
  .reset_state(reset_state),
  .reset_inc_state(reset_inc_state),
- .winner_state(winner_state),
  .ld_timer(ld_timer),
- .done(done)
+ .done(done),
+
+ .ld_one(ld_one),
+ .ld_two(ld_two),
+ .ld_three(ld_three),
+ .ld_four(ld_four),
+ .done_numbers(done_numbers),
+ .decrement_pixel(decrement_pixel),
+ .inc_number_positions(inc_number_positions)
   );
 
-wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state, done;
+wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, done;
+
+wire ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers;
 
 datapath dp(
   .CLOCK_50(CLOCK_50),
@@ -172,7 +181,6 @@ datapath dp(
  .ld_timer(ld_timer),
  .reset_state(reset_state),
  .reset_inc_state(reset_inc_state),
- .winner_state(winner_state),
   .p1(p1[14:0]),
   .p2(p2[14:0]),
   .p3(p3[14:0]),
@@ -182,7 +190,15 @@ datapath dp(
   .colour(colour),
  .running(running),
  .winner(winner),
- .done(done)
+ .done(done),
+
+ .ld_one(ld_one),
+ .ld_two(ld_two),
+ .ld_three(ld_three),
+ .ld_four(ld_four),
+ .done_numbers(done_numbers),
+ .decrement_pixel(decrement_pixel),
+ .inc_number_positions(inc_number_positions)
   );
 
 
@@ -252,176 +268,264 @@ endmodule
 
 
 module datapath(
-CLOCK_50, clonke, timer,
-ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
-p1, p2, p3, p4,
-x, y,
-colour, running,
-winner, done
-);
+  CLOCK_50, clonke, timer,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
+  p1, p2, p3, p4,
+  x, y,
+  colour, running,
+  winner, done,
+  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
+  );
 
-output done;
-assign done = reset_address > 15'b10011111_1111111;
+  output done;
+  assign done = reset_address > 15'b10011111_1111111;
 
-input [1:0] winner;
-input CLOCK_50, clonke, timer;
-input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state;
+  input [1:0] winner;
+  input CLOCK_50, clonke, timer;
+  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
-input [14:0] p1, p2, p3, p4; // location information for players
+  input [14:0] p1, p2, p3, p4; // location information for players
 
-output reg [7:0] x;
-output reg [6:0] y;
+  output reg [7:0] x;
+  output reg [6:0] y;
 
-reg [14:0] reset_address = 0;
+  reg [14:0] reset_address = 0;
 
-output reg [2:0] colour;
-output reg running = 1;
-reg [7:0] timer_x;
-always@(posedge CLOCK_50)
-begin
+  output reg [2:0] colour;
+  output reg running = 1;
+  reg [7:0] timer_x;
 
-  if (ld_p1)
-    begin
-      x <= p1[14:7];
-      y <= p1[6:0];
-      colour <= 3'b001;
-    end
+  input ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
+  output reg done_numbers;
 
-  else if (ld_p2)
-    begin
-      x <= p2[14:7];
-      y <= p2[6:0];
-      colour <= 3'b010;
-    end
+  integer pixel = 34;
 
-  else if (ld_p3)
-    begin
-      x <= p3[14:7];
-      y <= p3[6:0];
-      colour <= 3'b100;
-    end
+  reg [34:0] one   = 34'b11100_00100_00100_00100_00100_00100_11111;
+  reg [34:0] two   = 34'b11111_00001_00001_11111_10000_10000_11111;
+  reg [34:0] three = 34'b11111_00001_00001_11111_00001_00001_11111;
+  reg [34:0] four  = 34'b10001_10001_10001_11111_00001_00001_00001;
 
-  else if (ld_p4)
-    begin
-      x <= p4[14:7];
-      y <= p4[6:0];
-      colour <= 3'b110;
-    end
-else if (ld_timer)
-  begin
-    x <= timer_x;
-    y <= 7'b1110111;
-    colour <= 3'b111;
-  end
-else if (reset_state)
-  begin
-    colour <= 3'b000;
-    x <= reset_address[14:7];
-    y <= reset_address[6:0];
-  end
-else if (reset_inc_state)
+  reg [14:0] one_address   = 15'b00100001_0101010; // 33, 42 -> 5x7
+  reg [14:0] two_address   = 15'b00111111_0101010; // 63, 42
+  reg [14:0] three_address = 15'b01011101_0101010; // 93, 42
+  reg [14:0] four_address  = 15'b01111011_0101010; // 123, 42
+
+  always@(posedge CLOCK_50)
   begin
 
-  reset_address <= reset_address + 1'b1;
-  end
-else if (winner_state)
-  begin
-    x <= 8'b01010101;
-    y <= 7'b0101010;
-    case (winner)
-      2'b00 : colour <= 3'b001;
-      2'b01 : colour <= 3'b010;
-      2'b10 : colour <= 3'b100;
-      2'b11 : colour <= 3'b110;
-    endcase
-  end
-end
+    if (ld_p1)
+      begin
+        x <= p1[14:7];
+        y <= p1[6:0];
+        colour <= 3'b001;
+      end
 
-always@(posedge timer)
-begin
-  if (timer_x >= 8'b10011110)
-    running <= 0;
-  timer_x <= timer_x + 1'b1;
-end
+    else if (ld_p2)
+      begin
+        x <= p2[14:7];
+        y <= p2[6:0];
+        colour <= 3'b010;
+      end
+
+    else if (ld_p3)
+      begin
+        x <= p3[14:7];
+        y <= p3[6:0];
+        colour <= 3'b100;
+      end
+
+    else if (ld_p4)
+      begin
+        x <= p4[14:7];
+        y <= p4[6:0];
+        colour <= 3'b110;
+      end
+  else if (ld_timer)
+    begin
+      x <= timer_x;
+      y <= 7'b1110111;
+      colour <= 3'b111;
+    end
+  else if (reset_state)
+    begin
+      colour <= 3'b000;
+      x <= reset_address[14:7];
+      y <= reset_address[6:0];
+    end
+  else if (reset_inc_state)
+    begin
+
+    reset_address <= reset_address + 1'b1;
+    end
+
+  else if (ld_one)
+    begin
+      x <= one_address[14:7];
+      y <= one_address[6:0];
+      if (one[pixel] == 0)
+        colour <= 3'b000;
+      else
+        colour <= 3'b111;
+    end
+  else if (ld_two)
+    begin
+      x <= two_address[14:7];
+      y <= two_address[6:0];
+      if (two[pixel] == 0)
+        colour <= 3'b000;
+      else
+        colour <= 3'b111;
+    end
+  else if (ld_three)
+    begin
+      x <= three_address[14:7];
+      y <= three_address[6:0];
+      if (three[pixel] == 0)
+        colour <= 3'b000;
+      else
+        colour <= 3'b111;
+    end
+  else if (ld_four)
+    begin
+      x <= four_address[14:7];
+      y <= four_address[6:0];
+      if (four[pixel] == 0)
+        colour <= 3'b000;
+      else
+        colour <= 3'b111;
+    end
+
+  else if (inc_number_positions)
+    begin
+      if (pixel == 30 || pixel == 25 || pixel == 20 || pixel == 15 || pixel == 10 || pixel == 5)
+        begin
+          one_address[6:0] <= one_address[6:0] + 1'b1;
+          two_address[6:0] <= two_address[6:0] + 1'b1;
+          three_address[6:0] <= three_address[6:0] + 1'b1;
+          four_address[6:0] <= four_address[6:0] + 1'b1;
+        end
+      else if (pixel == 0)
+        begin
+          done_numbers <= 1;
+        end
+      else
+        begin
+          one_address[14:7] <= one_address[14:7] + 1'b1;
+          two_address[14:7] <= two_address[14:7] + 1'b1;
+          three_address[14:7] <= three_address[14:7] + 1'b1;
+          four_address[14:7] <= four_address[14:7] + 1'b1;
+        end
+    end
+
+    else if (decrement_pixel)
+      pixel = pixel - 1;
+
+  always@(posedge timer)
+  begin
+    if (timer_x >= 8'b10011110)
+      running <= 0;
+    timer_x <= timer_x + 1'b1;
+  end
 
 endmodule
 
 
 module control(
-CLOCK_50,
-ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
-running, done
-);
+  CLOCK_50,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
+  running, done,
 
-input CLOCK_50, running, done;
-output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state;
+  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
+  );
 
-reg [4:0] current_state, next_state;
+  input CLOCK_50, running, done;
+  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
-localparam  DRAW_P1 = 5'd0,
-            DRAW_P2 = 5'd1,
-            DRAW_P3 = 5'd2,
-            DRAW_P4 = 5'd3,
-        DRAW_TIMER = 5'd4,
-        RESET = 5'd5,
-        DRAW_WINNER = 5'd7,
-        RESET_INCREMENT = 5'd6;
 
-always@(*)
-begin: state_table
-  case (current_state)
-    DRAW_P1 : next_state = DRAW_P2;
-    DRAW_P2 : next_state = DRAW_P3;
-    DRAW_P3 : next_state = DRAW_P4;
-    DRAW_P4 : next_state = DRAW_TIMER;
-  DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
-  RESET : next_state = RESET_INCREMENT;
-  RESET_INCREMENT: next_state = done ? DRAW_WINNER : RESET;
-  DRAW_WINNER : next_state = DRAW_WINNER;
-    default : next_state = DRAW_P1;
-  endcase
-end
+  output reg ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
+  input done_numbers;
 
-always@(*)
-begin: enable_signals
-  ld_p1 = 0;
-  ld_p2 = 0;
-  ld_p3 = 0;
-  ld_p4 = 0;
- ld_timer = 0;
- reset_state = 0;
- reset_inc_state = 0;
- winner_state = 0;
-  case (current_state)
-    DRAW_P1 : begin
-        ld_p1 = 1;
-      end
-    DRAW_P2 : begin
-        ld_p2 = 1;
-      end
-    DRAW_P3 : begin
-        ld_p3 = 1;
-      end
-    DRAW_P4 : begin
-        ld_p4 = 1;
-      end
-   DRAW_TIMER : begin
-     ld_timer = 1;
-    end
-  RESET : begin
-      reset_state = 1;
-    end
-   RESET_INCREMENT : begin
-     reset_inc_state = 1;
-    end
-  DRAW_WINNER : begin
-      winner_state = 1;
-    end
-  endcase
-end
 
-always@(posedge CLOCK_50)
-begin: state_FFS
-  current_state <= next_state;
-end
+  reg [4:0] current_state, next_state;
+
+  localparam  DRAW_P1 = 5'd0,
+              DRAW_P2 = 5'd1,
+              DRAW_P3 = 5'd2,
+              DRAW_P4 = 5'd3,
+              DRAW_TIMER = 5'd4,
+              RESET = 5'd5,
+              RESET_INCREMENT = 5'd6,
+              DRAW_ONE = 5'd7,
+              DRAW_TWO = 5'd8,
+              DRAW_THREE= 5'd9,
+              DRAW_FOUR = 5'd10,
+              INC_NUMBER_POS = 5'd11,
+              DEC_PIXEL = 5'd12,
+              END = 5'd13;
+
+  always@(*)
+  begin: state_table
+    case (current_state)
+      DRAW_P1 : next_state = DRAW_P2;
+      DRAW_P2 : next_state = DRAW_P3;
+      DRAW_P3 : next_state = DRAW_P4;
+      DRAW_P4 : next_state = DRAW_TIMER;
+      DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
+      RESET : next_state = RESET_INCREMENT;
+      RESET_INCREMENT: next_state = done ? DRAW_ONE : RESET;
+
+      DRAW_ONE : next_state = DRAW_TWO;
+      DRAW_TWO : next_state = DRAW_THREE;
+      DRAW_THREE : next_state = DRAW_FOUR;
+      DRAW_FOUR : next_state = INC_NUMBER_POS;
+      INC_NUMBER_POS : next_state = DEC_PIXEL;
+      DEC_PIXEL : next_state = done_numbers ? END : DRAW_ONE;
+
+      END : next_state = END;
+      default : next_state = DRAW_P1;
+    endcase
+  end
+
+  always@(*)
+  begin: enable_signals
+    ld_p1 = 0;
+    ld_p2 = 0;
+    ld_p3 = 0;
+    ld_p4 = 0;
+    ld_timer = 0;
+    reset_state = 0;
+    reset_inc_state = 0;
+    winner_state = 0;
+
+    ld_one = 0;
+    ld_two = 0;
+    ld_three = 0;
+    ld_four = 0;
+    inc_number_positions = 0;
+    decrement_pixel = 0;
+
+    case (current_state)
+      DRAW_P1 : ld_p1 = 1;
+      DRAW_P2 : ld_p2 = 1;
+      DRAW_P3 : ld_p3 = 1;
+      DRAW_P4 : ld_p4 = 1;
+
+      DRAW_TIMER : ld_timer = 1;
+      RESET : reset_state = 1;
+
+      RESET_INCREMENT : reset_inc_state = 1;
+
+      DRAW_ONE : ld_one = 1;
+      DRAW_TWO : ld_two = 1;
+      DRAW_THREE : ld_three = 1;
+      DRAW_FOUR : ld_four = 1;
+      INC_NUMBER_POS : inc_number_positions = 1;
+      DEC_PIXEL : decrement_pixel = 1;
+    endcase
+  end
+
+  always@(posedge CLOCK_50)
+  begin: state_FFS
+    current_state <= next_state;
+  end
 endmodule
