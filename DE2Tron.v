@@ -57,6 +57,7 @@ module DE2Tron(
 	 input [1:0] SW, KEY;
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
+/*
 	 hex_display h7(address[14:12], HEX7[6:0]);
 	 hex_display h6(address[11:8], HEX6[6:0]);
 	 hex_display h5(address[7:4], HEX5[6:0]);
@@ -65,7 +66,8 @@ module DE2Tron(
 	 hex_display h3(p1_count[14:12], HEX3[6:0]);
 	 hex_display h2(p1_count[11:8], HEX2[6:0]);
 	 hex_display h1(p1_count[7:4], HEX1[6:0]);
-	 hex_display h0(p1_count[3:0], HEX0[6:0]);
+	 */
+	 hex_display h0(winner, HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
