@@ -10,7 +10,7 @@ module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
     PS2_KBCLK,
     PS2_KBDAT,
-	 SW, KEY,
+	 //SW, KEY,
 
 	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
@@ -54,10 +54,11 @@ module DE2Tron(
 		j = j+ 1;
 	 end
 	 */
-	 input [1:0] SW, KEY;
+	 //input [1:0] SW, KEY;
+
 	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
-/*
+
 	 hex_display h7(address[14:12], HEX7[6:0]);
 	 hex_display h6(address[11:8], HEX6[6:0]);
 	 hex_display h5(address[7:4], HEX5[6:0]);
@@ -66,8 +67,7 @@ module DE2Tron(
 	 hex_display h3(p1_count[14:12], HEX3[6:0]);
 	 hex_display h2(p1_count[11:8], HEX2[6:0]);
 	 hex_display h1(p1_count[7:4], HEX1[6:0]);
-	 */
-	 hex_display h0(winner, HEX0[6:0]);
+	 hex_display h0(p1_count[3:0], HEX0[6:0]);
 
     input PS2_KBCLK, PS2_KBDAT;
     input           CLOCK_50;    //    50 MHz
@@ -203,14 +203,18 @@ module DE2Tron(
 
     control c(
     .CLOCK_50(CLOCK_50),
+	 .running(running),
     .ld_p1(ld_p1),
     .ld_p2(ld_p2),
     .ld_p3(ld_p3),
     .ld_p4(ld_p4),
-	 .ld_timer(ld_timer)
+	 .reset_state(reset_state),
+	 .winner_state(winner_state),
+	 .ld_timer(ld_timer),
+	 .done(done)
     );
 
-  wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
+  wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state, done;
 
   datapath dp(
     .CLOCK_50(CLOCK_50),
@@ -221,6 +225,8 @@ module DE2Tron(
     .ld_p3(ld_p3),
     .ld_p4(ld_p4),
 	 .ld_timer(ld_timer),
+	 .reset_state(reset_state),
+	 .winner_state(winner_state),
     .p1(p1[14:0]),
     .p2(p2[14:0]),
     .p3(p3[14:0]),
@@ -228,7 +234,9 @@ module DE2Tron(
     .x(x),
     .y(y),
     .colour(colour),
-	 .running(running)
+	 .running(running),
+	 .winner(winner),
+	 .done(done)
     );
 
 
@@ -299,19 +307,23 @@ endmodule
 
 module datapath(
   CLOCK_50, clonke, timer,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state,
   p1, p2, p3, p4,
   x, y,
-  colour, running
+  colour, running,
+  winner, done
   );
-
+  output reg done = 1'b1;
+  input [1:0] winner;
   input CLOCK_50, clonke, timer;
-  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
+  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state;
 
   input [14:0] p1, p2, p3, p4; // location information for players
 
   output reg [7:0] x;
   output reg [6:0] y;
+  reg [7:0] clear_x;
+  reg [6:0] clear_y;
   output reg [2:0] colour;
   output reg running = 1;
   reg [7:0] timer_x;
@@ -351,6 +363,31 @@ module datapath(
 			y <= 7'b1110111;
 			colour <= 3'b111;
 		end
+	else if (reset_state)
+		begin
+		
+		
+		// done = 0
+		if(done)
+			begin
+				colour <= 3'b000;
+				x <= clear_x;
+				y <= clear_y;
+			end
+		// done =1
+
+		end
+	else if (winner_state)
+		begin
+			x <= 8'b01010101;
+			y <= 7'b0101010;
+			case (winner)
+			  2'b00 : colour <= 3'b001;
+			  2'b01 : colour <= 3'b010;
+			  2'b10 : colour <= 3'b100;
+			  2'b11 : colour <= 3'b110;
+			endcase
+		end
   end
 
   always@(posedge timer)
@@ -365,11 +402,12 @@ endmodule
 
 module control(
   CLOCK_50,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state,
+  running, done
   );
 
-  input CLOCK_50;
-  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer;
+  input CLOCK_50, running, done;
+  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state;
 
   reg [4:0] current_state, next_state;
 
@@ -377,7 +415,10 @@ module control(
               DRAW_P2 = 5'd1,
               DRAW_P3 = 5'd2,
               DRAW_P4 = 5'd3,
-				  DRAW_TIMER = 5'd4;
+				  DRAW_TIMER = 5'd4,
+				  RESET = 5'd5,
+				  DRAW_WINNER = 5'd6,
+				  RESET_INCREMENT = 5'd7;
 
   always@(*)
   begin: state_table
@@ -386,7 +427,9 @@ module control(
       DRAW_P2 : next_state = DRAW_P3;
       DRAW_P3 : next_state = DRAW_P4;
       DRAW_P4 : next_state = DRAW_TIMER;
-		DRAW_TIMER : next_state = DRAW_P1;
+		DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
+		RESET : next_state = done ? DRAW_WINNER : RESET;
+		DRAW_WINNER : next_state = DRAW_WINNER;
       default : next_state = DRAW_P1;
     endcase
   end
@@ -398,6 +441,8 @@ module control(
     ld_p3 = 0;
     ld_p4 = 0;
 	 ld_timer = 0;
+	 reset_state = 0;
+	 winner_state = 0;
     case (current_state)
       DRAW_P1 : begin
           ld_p1 = 1;
@@ -413,6 +458,12 @@ module control(
         end
 	   DRAW_TIMER : begin
 			 ld_timer = 1;
+		  end
+		RESET : begin
+		    reset_state = 1;
+		  end
+		DRAW_WINNER : begin
+		    winner_state = 1;
 		  end
     endcase
   end
