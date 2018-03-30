@@ -144,6 +144,7 @@ module DE2Tron(
 	//assign ramclk = running ? clock25 : KEY[0];
 
 	///////
+
   control c(
   .CLOCK_50(CLOCK_50),
  .running(running),
@@ -151,13 +152,14 @@ module DE2Tron(
   .ld_p2(ld_p2),
   .ld_p3(ld_p3),
   .ld_p4(ld_p4),
-   .reset_state(reset_state),
-   .winner_state(winner_state),
-   .ld_timer(ld_timer),
-   .done(done)
+ .reset_state(reset_state),
+ .reset_inc_state(reset_inc_state),
+ .winner_state(winner_state),
+ .ld_timer(ld_timer),
+ .done(done)
   );
 
-wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state, done;
+wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state, done;
 
 datapath dp(
   .CLOCK_50(CLOCK_50),
@@ -169,6 +171,7 @@ datapath dp(
   .ld_p4(ld_p4),
  .ld_timer(ld_timer),
  .reset_state(reset_state),
+ .reset_inc_state(reset_inc_state),
  .winner_state(winner_state),
   .p1(p1[14:0]),
   .p2(p2[14:0]),
@@ -249,170 +252,186 @@ endmodule
 
 
 module datapath(
-  CLOCK_50, clonke, timer,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state,
-  p1, p2, p3, p4,
-  x, y,
-  colour, running,
-  winner, done
-    );
-  output reg done = 1'b1;
-  input [1:0] winner;
-  input CLOCK_50, clonke, timer;
-  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state;
+CLOCK_50, clonke, timer,
+ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
+p1, p2, p3, p4,
+x, y,
+colour, running,
+winner, done
+);
 
-  input [14:0] p1, p2, p3, p4; // location information for players
+output done;
+assign done = reset_address > 15'b10011111_1111111;
 
-  output reg [7:0] x;
-  output reg [6:0] y;
-  reg [7:0] clear_x;
-  reg [6:0] clear_y;
-  output reg [2:0] colour;
-  output reg running = 1;
-  reg [7:0] timer_x;
-  always@(posedge CLOCK_50)
+input [1:0] winner;
+input CLOCK_50, clonke, timer;
+input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state;
+
+input [14:0] p1, p2, p3, p4; // location information for players
+
+output reg [7:0] x;
+output reg [6:0] y;
+
+reg [14:0] reset_address = 0;
+
+output reg [2:0] colour;
+output reg running = 1;
+reg [7:0] timer_x;
+always@(posedge CLOCK_50)
+begin
+
+  if (ld_p1)
+    begin
+      x <= p1[14:7];
+      y <= p1[6:0];
+      colour <= 3'b001;
+    end
+
+  else if (ld_p2)
+    begin
+      x <= p2[14:7];
+      y <= p2[6:0];
+      colour <= 3'b010;
+    end
+
+  else if (ld_p3)
+    begin
+      x <= p3[14:7];
+      y <= p3[6:0];
+      colour <= 3'b100;
+    end
+
+  else if (ld_p4)
+    begin
+      x <= p4[14:7];
+      y <= p4[6:0];
+      colour <= 3'b110;
+    end
+else if (ld_timer)
   begin
-
-    if (ld_p1)
-      begin
-        x <= p1[14:7];
-        y <= p1[6:0];
-        colour <= 3'b001;
-      end
-
-    else if (ld_p2)
-      begin
-        x <= p2[14:7];
-        y <= p2[6:0];
-        colour <= 3'b010;
-      end
-
-    else if (ld_p3)
-      begin
-        x <= p3[14:7];
-        y <= p3[6:0];
-        colour <= 3'b100;
-      end
-
-    else if (ld_p4)
-      begin
-        x <= p4[14:7];
-        y <= p4[6:0];
-        colour <= 3'b110;
-      end
-  else if (ld_timer)
-    begin
-      x <= timer_x;
-      y <= 7'b1110111;
-      colour <= 3'b111;
-    end
-  else if (reset_state)
-    begin
-
-
-    // done = 0
-    if(done)
-      begin
-        colour <= 3'b000;
-        x <= clear_x;
-        y <= clear_y;
-      end
-    // done =1
-
-    end
-  else if (winner_state)
-    begin
-      x <= 8'b01010101;
-      y <= 7'b0101010;
-      case (winner)
-        2'b00 : colour <= 3'b001;
-        2'b01 : colour <= 3'b010;
-        2'b10 : colour <= 3'b100;
-        2'b11 : colour <= 3'b110;
-      endcase
-    end
+    x <= timer_x;
+    y <= 7'b1110111;
+    colour <= 3'b111;
   end
-
-  always@(posedge timer)
+else if (reset_state)
   begin
-    if (timer_x >= 8'bb10011110)
-      running <= 0;
-    timer_x <= timer_x + 1'b1;
+    colour <= 3'b000;
+    x <= reset_address[14:7];
+    y <= reset_address[6:0];
   end
+else if (reset_inc_state)
+  begin
+  /*
+  if(clear_x == 8'd160)
+    begin
+      clear_x <= 8'b00000000;
+      clear_y <= clear_y + 1'b1;
+    end
+  else
+    clear_x <= clear_x + 1'b1;
+  if(clear_x == 8'd160 && clear_y == 7'd120)
+    done = 1;
+    */
+  reset_address <= reset_address + 1'b1;
+  end
+else if (winner_state)
+  begin
+    x <= 8'b01010101;
+    y <= 7'b0101010;
+    case (winner)
+      2'b00 : colour <= 3'b001;
+      2'b01 : colour <= 3'b010;
+      2'b10 : colour <= 3'b100;
+      2'b11 : colour <= 3'b110;
+    endcase
+  end
+end
+
+always@(posedge timer)
+begin
+  if (timer_x >= 8'b10011110)
+    running <= 0;
+  timer_x <= timer_x + 1'b1;
+end
 
 endmodule
 
 
 module control(
-  CLOCK_50,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state,
-  running, done
-  );
+CLOCK_50,
+ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
+running, done
+);
 
-  input CLOCK_50, running, done;
-  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state;
+input CLOCK_50, running, done;
+output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state;
 
-  reg [4:0] current_state, next_state;
+reg [4:0] current_state, next_state;
 
-  localparam  DRAW_P1 = 5'd0,
-              DRAW_P2 = 5'd1,
-              DRAW_P3 = 5'd2,
-              DRAW_P4 = 5'd3,
-          DRAW_TIMER = 5'd4,
-          RESET = 5'd5,
-          DRAW_WINNER = 5'd6,
-          RESET_INCREMENT = 5'd7;
+localparam  DRAW_P1 = 5'd0,
+            DRAW_P2 = 5'd1,
+            DRAW_P3 = 5'd2,
+            DRAW_P4 = 5'd3,
+        DRAW_TIMER = 5'd4,
+        RESET = 5'd5,
+        DRAW_WINNER = 5'd7,
+        RESET_INCREMENT = 5'd6;
 
-  always@(*)
-  begin: state_table
-    case (current_state)
-      DRAW_P1 : next_state = DRAW_P2;
-      DRAW_P2 : next_state = DRAW_P3;
-      DRAW_P3 : next_state = DRAW_P4;
-      DRAW_P4 : next_state = DRAW_TIMER;
-    DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
-    RESET : next_state = done ? DRAW_WINNER : RESET;
-    DRAW_WINNER : next_state = DRAW_WINNER;
-      default : next_state = DRAW_P1;
-    endcase
-  end
+always@(*)
+begin: state_table
+  case (current_state)
+    DRAW_P1 : next_state = DRAW_P2;
+    DRAW_P2 : next_state = DRAW_P3;
+    DRAW_P3 : next_state = DRAW_P4;
+    DRAW_P4 : next_state = DRAW_TIMER;
+  DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
+  RESET : next_state = RESET_INCREMENT;
+  RESET_INCREMENT: next_state = done ? DRAW_WINNER : RESET;
+  DRAW_WINNER : next_state = DRAW_WINNER;
+    default : next_state = DRAW_P1;
+  endcase
+end
 
-  always@(*)
-  begin: enable_signals
-    ld_p1 = 0;
-    ld_p2 = 0;
-    ld_p3 = 0;
-    ld_p4 = 0;
-   ld_timer = 0;
-   reset_state = 0;
-   winner_state = 0;
-    case (current_state)
-      DRAW_P1 : begin
-          ld_p1 = 1;
-        end
-      DRAW_P2 : begin
-          ld_p2 = 1;
-        end
-      DRAW_P3 : begin
-          ld_p3 = 1;
-        end
-      DRAW_P4 : begin
-          ld_p4 = 1;
-        end
-     DRAW_TIMER : begin
-       ld_timer = 1;
+always@(*)
+begin: enable_signals
+  ld_p1 = 0;
+  ld_p2 = 0;
+  ld_p3 = 0;
+  ld_p4 = 0;
+ ld_timer = 0;
+ reset_state = 0;
+ reset_inc_state = 0;
+ winner_state = 0;
+  case (current_state)
+    DRAW_P1 : begin
+        ld_p1 = 1;
       end
-    RESET : begin
-        reset_state = 1;
+    DRAW_P2 : begin
+        ld_p2 = 1;
       end
-    DRAW_WINNER : begin
-        winner_state = 1;
+    DRAW_P3 : begin
+        ld_p3 = 1;
       end
-    endcase
-  end
+    DRAW_P4 : begin
+        ld_p4 = 1;
+      end
+   DRAW_TIMER : begin
+     ld_timer = 1;
+    end
+  RESET : begin
+      reset_state = 1;
+    end
+   RESET_INCREMENT : begin
+     reset_inc_state = 1;
+    end
+  DRAW_WINNER : begin
+      winner_state = 1;
+    end
+  endcase
+end
 
-  always@(posedge CLOCK_50)
-  begin: state_FFS
-    current_state <= next_state;
-  end
+always@(posedge CLOCK_50)
+begin: state_FFS
+  current_state <= next_state;
+end
 endmodule
