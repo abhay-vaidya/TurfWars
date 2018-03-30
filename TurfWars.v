@@ -2,17 +2,17 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
-`include "splatoon_mechanics.v"
+`include "mechanics.v"
 `include "ps2controller.v"
 `include "ram19200x3.v"
 
 module DE2Tron(
     CLOCK_50,    // On Board 50 MHz
-    PS2_KBCLK,
+		PS2_KBCLK,
     PS2_KBDAT,
 	 //SW, KEY,
 
-	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
+	 	HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
     VGA_CLK,       //    VGA Clock
@@ -24,64 +24,35 @@ module DE2Tron(
     VGA_G,         //    VGA Green[9:0]
     VGA_B         //    VGA Blue[9:0]
     );
-/*
-	 reg [2:0] lol [32767:0];
-	 integer i,j;
-	 always@(*)
-	 begin
-		  for (i=1;i<5000; i=i+1)
-            lol[i] <= 1;
-		  for (i=5001;i<10000; i=i+1)
-			lol[i] <= 2;
-		  for (i=10001;i<15000; i=i+1)
-			lol[i] <= 3;
-		  for (i=15001;i<20000; i=i+1)
-			lol[i] <= 4;
-		  for (i=20001;i<25000; i=i+1)
-			lol[i] <= 5;
-		  for (i=25001;i<30000; i=i+1)
-			lol[i] <= 6;
-		  for (i=30001;i<32767; i=i+1)
-			lol[i] <= 7;
 
-	 end
+	//input [1:0] SW, KEY;
 
-	 wire lmfao;
-	 assign lmfao = lol[j];
-
-	 always@(posedge CLOCK_50)
-	 begin
-		j = j+ 1;
-	 end
-	 */
-	 //input [1:0] SW, KEY;
-
-	 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
+	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 
-	 hex_display h7(address[14:12], HEX7[6:0]);
-	 hex_display h6(address[11:8], HEX6[6:0]);
-	 hex_display h5(address[7:4], HEX5[6:0]);
-	 hex_display h4(address[3:0], HEX4[6:0]);
+	hex_display h7(address[14:12], HEX7[6:0]);
+	hex_display h6(address[11:8], HEX6[6:0]);
+	hex_display h5(address[7:4], HEX5[6:0]);
+	hex_display h4(address[3:0], HEX4[6:0]);
 
-	 hex_display h3(p1_count[14:12], HEX3[6:0]);
-	 hex_display h2(p1_count[11:8], HEX2[6:0]);
-	 hex_display h1(p1_count[7:4], HEX1[6:0]);
-	 hex_display h0(p1_count[3:0], HEX0[6:0]);
+	hex_display h3(p1_count[14:12], HEX3[6:0]);
+	hex_display h2(p1_count[11:8], HEX2[6:0]);
+	hex_display h1(p1_count[7:4], HEX1[6:0]);
+	hex_display h0(p1_count[3:0], HEX0[6:0]);
 
-    input PS2_KBCLK, PS2_KBDAT;
-    input           CLOCK_50;    //    50 MHz
+	input PS2_KBCLK, PS2_KBDAT;
+	input           CLOCK_50;    //    50 MHz
 
-    // Declare your inputs and outputs here
-    // Do not change the following outputs
-    output             VGA_CLK;       //    VGA Clock
-    output             VGA_HS;        //    VGA H_SYNC
-    output             VGA_VS;        //    VGA V_SYNC
-    output             VGA_BLANK_N;   //    VGA BLANK
-    output             VGA_SYNC_N;    //    VGA SYNC
-    output    [9:0]    VGA_R;         //    VGA Red[9:0]
-    output    [9:0]    VGA_G;         //    VGA Green[9:0]
-    output    [9:0]    VGA_B;         //    VGA Blue[9:0]
+	// Declare your inputs and outputs here
+	// Do not change the following outputs
+	output             VGA_CLK;       //    VGA Clock
+	output             VGA_HS;        //    VGA H_SYNC
+	output             VGA_VS;        //    VGA V_SYNC
+	output             VGA_BLANK_N;   //    VGA BLANK
+	output             VGA_SYNC_N;    //    VGA SYNC
+	output    [9:0]    VGA_R;         //    VGA Red[9:0]
+	output    [9:0]    VGA_G;         //    VGA Green[9:0]
+	output    [9:0]    VGA_B;         //    VGA Blue[9:0]
 
 
   keyboard kb(
@@ -99,134 +70,107 @@ module DE2Tron(
 
 	///////
 
-	  wire [14:0] p1, p2, p3, p4;
-	  move m(
-	    .clonke(clonke),
-		 .running(running),
-			.p1d(p1d),
-			.p2d(p2d),
-			.p3d(p3d),
-			.p4d(p4d),
-	    .p1(p1),
-	    .p2(p2),
-	    .p3(p3),
-	    .p4(p4)
-	    );
+	wire [14:0] p1, p2, p3, p4;
+	move m(
+	  .clonke(clonke),
+	 	.running(running),
+		.p1d(p1d),
+		.p2d(p2d),
+		.p3d(p3d),
+		.p4d(p4d),
+	  .p1(p1),
+	  .p2(p2),
+	  .p3(p3),
+	  .p4(p4)
+	  );
 
-		wire [2:0] p1d, p2d, p3d, p4d;
-	  directions d(
-	  .CLOCK_50(CLOCK_50),
-	    .KEY_PRESSED(KEY_PRESSED),
-	    .p1d(p1d),
-	    .p2d(p2d),
-	    .p3d(p3d),
-	    .p4d(p4d)
-	    );
+	wire [2:0] p1d, p2d, p3d, p4d;
+	directions d(
+	.CLOCK_50(CLOCK_50),
+	  .KEY_PRESSED(KEY_PRESSED),
+	  .p1d(p1d),
+	  .p2d(p2d),
+	  .p3d(p3d),
+	  .p4d(p4d)
+	  );
 
-	  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
-	  wire [14:0] address;//, address1; // 15 bits, 8 X bits, 7 Y bits
-	  wire [2:0] out; // data in the ram at the given address (3 bits)
-	  wire [2:0] data; // data to be written (3 bits)
+	wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
+	wire [14:0] address;//, address1; // 15 bits, 8 X bits, 7 Y bits
+	wire [2:0] out; // data in the ram at the given address (3 bits)
+	wire [2:0] data; // data to be written (3 bits)
 
-	  ram32768x3 ram(
-	    .address(address),
-	  	.clock(CLOCK_50),
-	  	.data(data),
-	  	.wren(wren),
-	  	.q(out)
-	    );
+	ram32768x3 ram(
+	  .address(address),
+		.clock(CLOCK_50),
+		.data(data),
+		.wren(wren),
+		.q(out)
+	  );
 
-		wire [1:0] winner;
-		wire [14:0] p1_count, p2_count, p3_count, p4_count;
-		wire running;
-		//assign running = SW[0];
-
-
-		update_ram update(
-			.clock25(clock25),
-			.running(running),
-			.address(address),
-			.wren(wren),
-			.data_to_ram(data),
-			.ram_output(out),
-			.p1(p1),
-			.p2(p2),
-			.p3(p3),
-			.p4(p4),
-			.p1_count(p1_count),
-			.p2_count(p2_count),
-			.p3_count(p3_count),
-			.p4_count(p4_count),
-			.winner(winner)
-			);
+	wire [1:0] winner;
+	wire [14:0] p1_count, p2_count, p3_count, p4_count;
+	wire running;
+	//assign running = SW[0];
 
 
-		//wire [14:0] write_address, read_address;
-		//wire wren_write;
+	update_ram update(
+		.clock25(clock25),
+		.running(running),
+		.address(address),
+		.wren(wren),
+		.data_to_ram(data),
+		.ram_output(out),
+		.p1(p1),
+		.p2(p2),
+		.p3(p3),
+		.p4(p4),
+		.p1_count(p1_count),
+		.p2_count(p2_count),
+		.p3_count(p3_count),
+		.p4_count(p4_count),
+		.winner(winner)
+		);
 
-		//assign address[14:0] = write_address;
-		//assign address1[14:0] = read_address;
 
-		//assign wren = running; // ? wren_write : 1'b0;
+	//wire [14:0] write_address, read_address;
+	//wire wren_write;
 
-		//wire ramclk;
-		//assign ramclk = running ? clock25 : KEY[0];
+	//assign address[14:0] = write_address;
+	//assign address1[14:0] = read_address;
 
+	//assign wren = running; // ? wren_write : 1'b0;
 
-/*
-
-		write_ram write(
-			.clock25(clock25),
-			.running(running),
-			.address(write_address),
-			.data(data),
-			.p1(p1),
-			.p2(p2),
-			.p3(p3),
-			.p4(p4)
-			);
-
-		read_ram read(
-			.clock25(clock25),
-			.running(running),
-			.address(read_address),
-			.out(out),
-			.p1_count(p1_count),
-			.p2_count(p2_count),
-			.p3_count(p3_count),
-			.p4_count(p4_count),
-			.winner(winner)
-			);
-			*/
+	//wire ramclk;
+	//assign ramclk = running ? clock25 : KEY[0];
 
 	///////
 
-    control c(
-    .CLOCK_50(CLOCK_50),
-	 .running(running),
-    .ld_p1(ld_p1),
-    .ld_p2(ld_p2),
-    .ld_p3(ld_p3),
-    .ld_p4(ld_p4),
-	 .reset_state(reset_state),
-	 .winner_state(winner_state),
-	 .ld_timer(ld_timer),
-	 .done(done)
-    );
+	control c(
+	.CLOCK_50(CLOCK_50),
+		.running(running),
+	.ld_p1(ld_p1),
+	.ld_p2(ld_p2),
+	.ld_p3(ld_p3),
+	.ld_p4(ld_p4),
+		.reset_state(reset_state),
+		.winner_state(winner_state),
+		.ld_timer(ld_timer),
+		.done(done)
+	);
 
   wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, winner_state, done;
 
   datapath dp(
     .CLOCK_50(CLOCK_50),
-	 .clonke(clonke),
-	 .timer(timer),
+	 	.clonke(clonke),
+	 	.timer(timer),
     .ld_p1(ld_p1),
     .ld_p2(ld_p2),
     .ld_p3(ld_p3),
     .ld_p4(ld_p4),
-	 .ld_timer(ld_timer),
-	 .reset_state(reset_state),
-	 .winner_state(winner_state),
+	 	.ld_timer(ld_timer),
+	 	.reset_state(reset_state),
+	 	.winner_state(winner_state),
     .p1(p1[14:0]),
     .p2(p2[14:0]),
     .p3(p3[14:0]),
@@ -234,9 +178,9 @@ module DE2Tron(
     .x(x),
     .y(y),
     .colour(colour),
-	 .running(running),
-	 .winner(winner),
-	 .done(done)
+	 	.running(running),
+	 	.winner(winner),
+	 	.done(done)
     );
 
 
@@ -365,8 +309,8 @@ module datapath(
 		end
 	else if (reset_state)
 		begin
-		
-		
+
+
 		// done = 0
 		if(done)
 			begin
