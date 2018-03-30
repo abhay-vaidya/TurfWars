@@ -197,7 +197,7 @@ endmodule
 
 
 module update_ram(
-  CLOCK_50, clock25,
+  clock25,
   running,
   address,
   wren,
@@ -208,7 +208,7 @@ module update_ram(
   winner
   );
 
-  input CLOCK_50, clock25, running;
+  input clock25, running;
 
   output reg [14:0] address;
   output reg wren;
@@ -267,7 +267,7 @@ module update_ram(
       endcase
     end
 
-  always@(posedge CLOCK_50)
+  always@(negedge clock25)
     begin
       case (current_state)
         //START_WRITE : begin

@@ -143,7 +143,6 @@ module DE2Tron(
 
 
 		update_ram update(
-			.CLOCK_50(CLOCK_50),
 			.clock25(clock25),
 			.running(running),
 			.address(address),
