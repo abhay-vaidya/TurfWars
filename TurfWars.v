@@ -167,6 +167,12 @@ module TurfWars(
  .done_ordering(done_ordering),
  .done_waiting(done_waiting),
 
+  .draw_bar1(draw_bar1),
+ .increment_bars(increment_bars),
+ .done_bars(done_bars),
+ 
+ .starting(starting),
+ 
  .ld_one(ld_one),
  .ld_two(ld_two),
  .ld_three(ld_three),
@@ -180,6 +186,8 @@ wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, done, r
 
 wire ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers, done_waiting;
 
+wire draw_bar1, increment_bars, done_bars, starting;
+
 datapath dp(
   .CLOCK_50(CLOCK_50),
  .clonke(clonke),
@@ -192,6 +200,7 @@ datapath dp(
  .reset_state(reset_state),
  .reset_inc_state(reset_inc_state),
  .reset_wait_state(reset_wait_state),
+ .starting(starting),
  .done_waiting(done_waiting),
   .p1(p1[14:0]),
   .p2(p2[14:0]),
@@ -209,6 +218,11 @@ datapath dp(
  .ld_two(ld_two),
  .ld_three(ld_three),
  .ld_four(ld_four),
+ 
+ .draw_bar1(draw_bar1),
+ .increment_bars(increment_bars),
+ .done_bars(done_bars),
+ 
  .done_numbers(done_numbers),
  .decrement_pixel(decrement_pixel),
  .inc_number_positions(inc_number_positions)
@@ -287,7 +301,9 @@ module datapath(
   x, y,
   colour, running,
   ordered_colours, done, game_started, done_waiting,
-  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
+  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers,
+  
+  draw_bar1, increment_bars, done_bars, starting
   );
 
   output done;
@@ -311,7 +327,7 @@ module datapath(
   output reg running = 1;
   reg [7:0] timer_x;
 
-  input ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
+  input ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, starting;
   output reg done_numbers;
 
   reg [5:0] pixel = 6'd34;
@@ -326,12 +342,39 @@ module datapath(
   reg [14:0] three_address = 15'b01011101_0111100; // 93, 60
   reg [14:0] four_address  = 15'b01111011_1001000; // 123, 72
 
-  reg [14:0] bar_1_address = 15'b00011001_0111011; // 25 , 59 -> 46 , 120 
-  //reg [7:0]
+  reg [14:0] bar_1_address; //= 15'b00011100_0011111; // 28 , 31 -> 43 , 120
+  reg [14:0] bar_2_address = 15'b00111010_0101011; // 58 , 43 -> 73 , 120
+  reg [14:0] bar_3_address = 15'b01011000_0110111; // 88 , 55 -> 103 , 120
+  reg [14:0] bar_4_address = 15'b01110110_1000011; // 118 , 67 -> 133 , 120
+  /*
+  reg [14:0] bar_1_end = 15'b00101011_1111000;
+  reg [14:0] bar_2_end = 15'b01001001_1111000;
+  reg [14:0] bar_3_end = 15'b01100111_1111000;
+  reg [14:0] bar_4_end = 15'b10000101_1111000;
+  */
   
+  input increment_bars, draw_bar1;
+  output done_bars;
+  assign done_bars = bar_1_address == 15'b111111111111111;
   
   always@(posedge CLOCK_50)
   begin
+  
+	 if (increment_bars)
+		begin
+			bar_1_address <= bar_1_address + 1'b1;
+		end
+	
+	 if (draw_bar1)
+		begin
+			x <= bar_1_address[14:7];
+			y <= bar_1_address[6:0];
+			if (x >= 8'b00011100 && x <= 8'b00101011 && y >= 7'b0011110 || x >= 8'b00111010 && x <= 8'b01001001 && y >= 7'b0101010 || x >= 8'b01011000 && x <= 8'b01100111 && y >= 7'b0110110 || x >= 8'b01110110 && x <= 8'b10000101 && y >= 7'b1000010)
+				colour <= 3'b000;
+			else
+				colour <= 3'b111;
+		end
+  
 
     if (ld_p1)
       begin
@@ -370,8 +413,11 @@ module datapath(
   else if (reset_state)
     begin
 		reset_counter <= 28'd7999;
-      colour <= 3'b000;
-      x <= reset_address[14:7];
+		if (starting)
+			colour <= 3'b000;
+      else
+			colour <= 3'b111;
+		x <= reset_address[14:7];
       y <= reset_address[6:0];
     end
 	 
@@ -436,10 +482,6 @@ module datapath(
 			 three_address[14:7] <= 8'b01011101;
 			 four_address[14:7] <= 8'b01111011;
         end
-      //else if (pixel == 0)
-        //begin
-          //done_numbers <= 1;
-        //end
       else
         begin
           one_address[14:7] <= one_address[14:7] + 1'b1;
@@ -471,7 +513,9 @@ module control(
   ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, reset_wait_state, done_waiting,
   running, done, game_started, done_ordering,
 
-  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
+  ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers,
+  
+  draw_bar1, increment_bars, done_bars, starting
   );
 
   input CLOCK_50, running, done, space_pressed, done_ordering, done_waiting;
@@ -481,9 +525,13 @@ module control(
   output reg ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
   input done_numbers;
 
-  output game_started;
+  output reg draw_bar1, increment_bars;
+  input done_bars;
+  
+  output game_started, starting;
   assign game_started = current_state != START && current_state != CLEAR_BOARD && current_state != CLEAR_WAIT && current_state != CLEAR_INCREMENT;
-
+  assign starting = current_state == CLEAR_BOARD || current_state == CLEAR_WAIT || current_state == CLEAR_INCREMENT;
+  
   reg [4:0] current_state, next_state;
 
   localparam  START            = 5'd0,
@@ -505,7 +553,10 @@ module control(
 				  RESET_WAIT 		 = 5'd16,
 				  CLEAR_BOARD		 = 5'd17,
 				  CLEAR_WAIT 		 = 5'd18,
-				  CLEAR_INCREMENT  = 5'd19;
+				  CLEAR_INCREMENT  = 5'd19,
+				  
+				  DRAW_BAR_1 		 = 5'd20,
+				  BAR_INCREMENT   = 5'd21;
 
   always@(*)
   begin: state_table
@@ -526,7 +577,10 @@ module control(
 		RESET_WAIT : next_state = done_waiting ? RESET_INCREMENT : RESET_WAIT;
       RESET_INCREMENT: next_state = done ? DRAW_WINNER_WAIT : RESET;
 
-      DRAW_WINNER_WAIT: next_state = done_ordering ? DRAW_ONE : DRAW_WINNER_WAIT;
+      DRAW_WINNER_WAIT: next_state = done_ordering ? DRAW_BAR_1 : DRAW_WINNER_WAIT;
+		
+		DRAW_BAR_1 : next_state = BAR_INCREMENT;
+		BAR_INCREMENT : next_state = done_bars ? DRAW_ONE : DRAW_BAR_1;
 
       DRAW_ONE : next_state = DRAW_TWO;
       DRAW_TWO : next_state = DRAW_THREE;
@@ -557,6 +611,9 @@ module control(
     ld_four = 0;
     inc_number_positions = 0;
     decrement_pixel = 0;
+	 
+	 draw_bar1 = 0;
+	 increment_bars = 0;
 
     case (current_state)
 	 
@@ -574,6 +631,9 @@ module control(
       RESET : reset_state = 1;
 		RESET_WAIT : reset_wait_state = 1;
       RESET_INCREMENT : reset_inc_state = 1;
+		
+		DRAW_BAR_1 : draw_bar1 = 1;
+		BAR_INCREMENT : increment_bars = 1;
 
       DRAW_ONE : ld_one = 1;
       DRAW_TWO : ld_two = 1;
