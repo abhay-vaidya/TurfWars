@@ -113,7 +113,7 @@ module DE2Tron(
 
 	wire [11:0] ordered_colours;
 	wire [14:0] p1_count, p2_count, p3_count, p4_count;
-	wire running, game_started;
+	wire running, game_started, done_ordering;
 	//assign running = SW[0];
 
 
@@ -132,6 +132,7 @@ module DE2Tron(
 		.p2_count(p2_count),
 		.p3_count(p3_count),
 		.p4_count(p4_count),
+    .done_ordering(done_ordering),
 		.ordered_colours(ordered_colours)
 		);
 
@@ -162,6 +163,7 @@ module DE2Tron(
  .ld_timer(ld_timer),
  .done(done),
  .game_started(game_started),
+ .done_ordering(done_ordering),
 
  .ld_one(ld_one),
  .ld_two(ld_two),
@@ -449,12 +451,12 @@ endmodule
 module control(
   CLOCK_50, space_pressed,
   ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
-  running, done, game_started,
+  running, done, game_started, done_ordering,
 
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
-  input CLOCK_50, running, done, space_pressed;
+  input CLOCK_50, running, done, space_pressed, done_ordering;
   output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
 
@@ -463,24 +465,25 @@ module control(
 
   output game_started;
   assign game_started = current_state != START;
-  
+
   reg [4:0] current_state, next_state;
 
-  localparam  START = 5'd0,
-              DRAW_P1 = 5'd1,
-              DRAW_P2 = 5'd2,
-              DRAW_P3 = 5'd3,
-              DRAW_P4 = 5'd4,
-              DRAW_TIMER = 5'd5,
-              RESET = 5'd6,
-              RESET_INCREMENT = 5'd7,
-              DRAW_ONE = 5'd8,
-              DRAW_TWO = 5'd9,
-              DRAW_THREE= 5'd10,
-              DRAW_FOUR = 5'd11,
-              INC_NUMBER_POS = 5'd12,
-              DEC_PIXEL = 5'd13,
-              END = 5'd14;
+  localparam  START            = 5'd0,
+              DRAW_P1          = 5'd1,
+              DRAW_P2          = 5'd2,
+              DRAW_P3          = 5'd3,
+              DRAW_P4          = 5'd4,
+              DRAW_TIMER       = 5'd5,
+              RESET            = 5'd6,
+              RESET_INCREMENT  = 5'd7,
+              DRAW_WINNER_WAIT = 5'd8,
+              DRAW_ONE         = 5'd9,
+              DRAW_TWO         = 5'd10,
+              DRAW_THREE       = 5'd11,
+              DRAW_FOUR        = 5'd12,
+              INC_NUMBER_POS   = 5'd13,
+              DEC_PIXEL        = 5'd14,
+              END              = 5'd15;
 
   always@(*)
   begin: state_table
@@ -492,7 +495,9 @@ module control(
       DRAW_P4 : next_state = DRAW_TIMER;
       DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
       RESET : next_state = RESET_INCREMENT;
-      RESET_INCREMENT: next_state = done ? DRAW_ONE : RESET;
+      RESET_INCREMENT: next_state = done ? DRAW_WINNER_WAIT : RESET;
+
+      DRAW_WINNER_WAIT: next_state = done_ordering ? DRAW_ONE : DRAW_WINNER_WAIT;
 
       DRAW_ONE : next_state = DRAW_TWO;
       DRAW_TWO : next_state = DRAW_THREE;

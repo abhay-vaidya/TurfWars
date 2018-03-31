@@ -206,7 +206,7 @@ module update_ram(
   ram_output,
   p1, p2, p3, p4,
   p1_count, p2_count, p3_count, p4_count,
-  ordered_colours
+  ordered_colours, done_ordering
   );
 
   input clock25, running;
@@ -223,6 +223,11 @@ module update_ram(
   output reg [14:0] p1_count, p2_count, p3_count, p4_count;
 
   output reg [11:0] ordered_colours;
+  output reg done_ordering;
+
+  initial begin
+	done_ordering <= 1'b0;
+  end
 
   reg [2:0] curr;
 
@@ -355,6 +360,8 @@ module update_ram(
               ordered_colours <= 12'b110_100_010_001;
             else
               ordered_colours <= 12'b110_100_001_010;
+
+				done_ordering <= 1'b1;
           end
         //END : begin
           //end
