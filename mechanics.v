@@ -50,12 +50,12 @@ endmodule
 
 
 module move(
-  clonke, running,
+  clonke, running, game_started,
   p1d, p2d, p3d, p4d,
   p1, p2, p3, p4
   );
 
-  input clonke, running;
+  input clonke, running, game_started;
   input [1:0] p1d, p2d, p3d, p4d;
 
   output reg [14:0] p1, p2, p3, p4;
@@ -69,7 +69,7 @@ module move(
 
 	  always@(posedge clonke)
 	  begin
-		if(running)
+		if(running && game_started)
 			begin
 			case(p1d)
 			  2'b00:

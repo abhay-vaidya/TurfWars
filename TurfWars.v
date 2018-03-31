@@ -38,7 +38,7 @@ module DE2Tron(
 	hex_display h3(ordered_colours[11:9], HEX3[6:0]);
 	hex_display h2(ordered_colours[8:6], HEX2[6:0]);
 	hex_display h1(ordered_colours[5:3], HEX1[6:0]);
-	hex_display h0(ordered_colours[2:0], HEX0[6:0]);
+	hex_display h0(game_started, HEX0[6:0]);
 
 	input PS2_KBCLK, PS2_KBDAT;
 	input           CLOCK_50;    //    50 MHz
@@ -77,6 +77,7 @@ module DE2Tron(
 	move m(
 	  .clonke(clonke),
 	 	.running(running),
+		.game_started(game_started),
 		.p1d(p1d),
 		.p2d(p2d),
 		.p3d(p3d),
@@ -112,7 +113,7 @@ module DE2Tron(
 
 	wire [11:0] ordered_colours;
 	wire [14:0] p1_count, p2_count, p3_count, p4_count;
-	wire running;
+	wire running, game_started;
 	//assign running = SW[0];
 
 
@@ -160,6 +161,7 @@ module DE2Tron(
  .reset_inc_state(reset_inc_state),
  .ld_timer(ld_timer),
  .done(done),
+ .game_started(game_started),
 
  .ld_one(ld_one),
  .ld_two(ld_two),
@@ -193,6 +195,7 @@ datapath dp(
   .y(y),
   .colour(colour),
  .running(running),
+ .game_started(game_started),
  .ordered_colours(ordered_colours),
  .done(done),
 
@@ -277,7 +280,7 @@ module datapath(
   p1, p2, p3, p4,
   x, y,
   colour, running,
-  ordered_colours, done,
+  ordered_colours, done, game_started,
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
@@ -285,7 +288,7 @@ module datapath(
   assign done = reset_address > 15'b10011111_1111111;
 
   input [11:0] ordered_colours;
-  input CLOCK_50, clonke, timer;
+  input CLOCK_50, clonke, timer, game_started;
   input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
   input [14:0] p1, p2, p3, p4; // location information for players
@@ -432,9 +435,12 @@ module datapath(
 
   always@(posedge timer)
   begin
-    if (timer_x >= 8'b10011110)
-      running <= 0;
-    timer_x <= timer_x + 1'b1;
+    if (game_started)
+	 begin
+      if (timer_x >= 8'b10011110)
+        running <= 0;
+      timer_x <= timer_x + 1'b1;
+	 end
   end
 
 endmodule
@@ -443,7 +449,7 @@ endmodule
 module control(
   CLOCK_50, space_pressed,
   ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
-  running, done,
+  running, done, game_started,
 
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
@@ -455,7 +461,9 @@ module control(
   output reg ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
   input done_numbers;
 
-
+  output game_started;
+  assign game_started = current_state != START;
+  
   reg [4:0] current_state, next_state;
 
   localparam  START = 5'd0,
@@ -517,7 +525,7 @@ module control(
 
     case (current_state)
       DRAW_P1 : ld_p1 = 1;
-      DRAW_P2 : ld_p2 = 1;
+		DRAW_P2 : ld_p2 = 1;
       DRAW_P3 : ld_p3 = 1;
       DRAW_P4 : ld_p4 = 1;
 
