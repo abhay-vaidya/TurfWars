@@ -298,12 +298,12 @@ module datapath(
   input ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
   output reg done_numbers;
 
-  integer pixel = 34;
+  reg [5:0] pixel = 6'd34;
 
-  reg [34:0] one   = 34'b11100_00100_00100_00100_00100_00100_11111;
-  reg [34:0] two   = 34'b11111_00001_00001_11111_10000_10000_11111;
-  reg [34:0] three = 34'b11111_00001_00001_11111_00001_00001_11111;
-  reg [34:0] four  = 34'b10001_10001_10001_11111_00001_00001_00001;
+  reg [34:0] one   = 35'b11100_00100_00100_00100_00100_00100_11111;
+  reg [34:0] two   = 35'b11111_00001_00001_11111_10000_10000_11111;
+  reg [34:0] three = 35'b11111_00001_00001_11111_00001_00001_11111;
+  reg [34:0] four  = 35'b10001_10001_10001_11111_00001_00001_00001;
 
   reg [14:0] one_address   = 15'b00100001_0101010; // 33, 42 -> 5x7
   reg [14:0] two_address   = 15'b00111111_0101010; // 63, 42
@@ -397,17 +397,22 @@ module datapath(
 
   else if (inc_number_positions)
     begin
-      if (pixel == 30 || pixel == 25 || pixel == 20 || pixel == 15 || pixel == 10 || pixel == 5)
+		done_numbers <= pixel == 6'd0;
+      if (pixel == 6'd30 || pixel == 6'd25 || pixel == 6'd20 || pixel == 6'd15 || pixel == 6'd10 || pixel == 6'd5)
         begin
           one_address[6:0] <= one_address[6:0] + 1'b1;
           two_address[6:0] <= two_address[6:0] + 1'b1;
           three_address[6:0] <= three_address[6:0] + 1'b1;
           four_address[6:0] <= four_address[6:0] + 1'b1;
+			 one_address[14:7] <= 8'b00100001;
+			 two_address[14:7] <= 8'b00111111;
+			 three_address[14:7] <= 8'b01011101;
+			 four_address[14:7] <= 8'b01111011;
         end
-      else if (pixel == 0)
-        begin
-          done_numbers <= 1;
-        end
+      //else if (pixel == 0)
+        //begin
+          //done_numbers <= 1;
+        //end
       else
         begin
           one_address[14:7] <= one_address[14:7] + 1'b1;
@@ -418,7 +423,8 @@ module datapath(
     end
 
     else if (decrement_pixel)
-      pixel = pixel - 1;
+      pixel = pixel - 1'b1;
+	end
 
   always@(posedge timer)
   begin
@@ -432,7 +438,7 @@ endmodule
 
 module control(
   CLOCK_50,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, winner_state,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
   running, done,
 
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
@@ -495,7 +501,6 @@ module control(
     ld_timer = 0;
     reset_state = 0;
     reset_inc_state = 0;
-    winner_state = 0;
 
     ld_one = 0;
     ld_two = 0;
