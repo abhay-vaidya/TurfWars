@@ -63,6 +63,9 @@ module DE2Tron(
     .KEY_PRESSED(KEY_PRESSED)
     );
 
+  wire space_pressed;
+  assign space_pressed = KEY_PRESSED == 5'd16;
+
   wire [4:0] KEY_PRESSED;
   wire clock25, clonke, timer;
 
@@ -146,6 +149,7 @@ module DE2Tron(
 	///////
 
   control c(
+    .space_pressed(space_pressed),
   .CLOCK_50(CLOCK_50),
  .running(running),
   .ld_p1(ld_p1),
@@ -437,14 +441,14 @@ endmodule
 
 
 module control(
-  CLOCK_50,
+  CLOCK_50, space_pressed,
   ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
   running, done,
 
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
-  input CLOCK_50, running, done;
+  input CLOCK_50, running, done, space_pressed;
   output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
 
@@ -454,24 +458,26 @@ module control(
 
   reg [4:0] current_state, next_state;
 
-  localparam  DRAW_P1 = 5'd0,
-              DRAW_P2 = 5'd1,
-              DRAW_P3 = 5'd2,
-              DRAW_P4 = 5'd3,
-              DRAW_TIMER = 5'd4,
-              RESET = 5'd5,
-              RESET_INCREMENT = 5'd6,
-              DRAW_ONE = 5'd7,
-              DRAW_TWO = 5'd8,
-              DRAW_THREE= 5'd9,
-              DRAW_FOUR = 5'd10,
-              INC_NUMBER_POS = 5'd11,
-              DEC_PIXEL = 5'd12,
-              END = 5'd13;
+  localparam  START = 5'd0,
+              DRAW_P1 = 5'd1,
+              DRAW_P2 = 5'd2,
+              DRAW_P3 = 5'd3,
+              DRAW_P4 = 5'd4,
+              DRAW_TIMER = 5'd5,
+              RESET = 5'd6,
+              RESET_INCREMENT = 5'd7,
+              DRAW_ONE = 5'd8,
+              DRAW_TWO = 5'd9,
+              DRAW_THREE= 5'd10,
+              DRAW_FOUR = 5'd11,
+              INC_NUMBER_POS = 5'd12,
+              DEC_PIXEL = 5'd13,
+              END = 5'd14;
 
   always@(*)
   begin: state_table
     case (current_state)
+      START : next_state = space_pressed ? DRAW_P1 : START;
       DRAW_P1 : next_state = DRAW_P2;
       DRAW_P2 : next_state = DRAW_P3;
       DRAW_P3 : next_state = DRAW_P4;
@@ -488,7 +494,7 @@ module control(
       DEC_PIXEL : next_state = done_numbers ? END : DRAW_ONE;
 
       END : next_state = END;
-      default : next_state = DRAW_P1;
+      default : next_state = START;
     endcase
   end
 

@@ -43,7 +43,6 @@ module directions(
         5'd13: p4d[1:0] <= 2'b01;
         5'd14: p4d[1:0] <= 2'b10;
         5'd15: p4d[1:0] <= 2'b11;
-        //5'd16: reset game
       endcase
     end
 
