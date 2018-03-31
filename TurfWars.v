@@ -12,7 +12,7 @@ module DE2Tron(
     PS2_KBDAT,
 	 //SW, KEY,
 
-	 	//HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
+	 	HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
     VGA_CLK,       //    VGA Clock
@@ -26,7 +26,7 @@ module DE2Tron(
     );
 
 	//input [1:0] SW, KEY;
-/*
+
 	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 
@@ -35,11 +35,11 @@ module DE2Tron(
 	hex_display h5(address[7:4], HEX5[6:0]);
 	hex_display h4(address[3:0], HEX4[6:0]);
 
-	hex_display h3(p1_count[14:12], HEX3[6:0]);
-	hex_display h2(p1_count[11:8], HEX2[6:0]);
-	hex_display h1(p1_count[7:4], HEX1[6:0]);
-	hex_display h0(p1_count[3:0], HEX0[6:0]);
-*/
+	hex_display h3(ordered_colours[11:9], HEX3[6:0]);
+	hex_display h2(ordered_colours[8:6], HEX2[6:0]);
+	hex_display h1(ordered_colours[5:3], HEX1[6:0]);
+	hex_display h0(ordered_colours[2:0], HEX0[6:0]);
+
 	input PS2_KBCLK, PS2_KBDAT;
 	input           CLOCK_50;    //    50 MHz
 
