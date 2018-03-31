@@ -6,13 +6,13 @@
 `include "ps2controller.v"
 `include "ram19200x3.v"
 
-module DE2Tron(
+module TurfWars(
     CLOCK_50,    // On Board 50 MHz
 		PS2_KBCLK,
     PS2_KBDAT,
 	 //SW, KEY,
 
-	 	HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
+	 	//HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
 
     // The ports below are for the VGA output.  Do not change.
     VGA_CLK,       //    VGA Clock
@@ -26,7 +26,7 @@ module DE2Tron(
     );
 
 	//input [1:0] SW, KEY;
-
+/*
 	output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7;
 
 
@@ -38,8 +38,8 @@ module DE2Tron(
 	hex_display h3(ordered_colours[11:9], HEX3[6:0]);
 	hex_display h2(ordered_colours[8:6], HEX2[6:0]);
 	hex_display h1(ordered_colours[5:3], HEX1[6:0]);
-	hex_display h0(space_pressed, HEX0[6:0]);
-
+	hex_display h0(ordered_colours[2:0], HEX0[6:0]);
+*/
 	input PS2_KBCLK, PS2_KBDAT;
 	input           CLOCK_50;    //    50 MHz
 
@@ -331,6 +331,7 @@ module datapath(
 
     if (ld_p1)
       begin
+		  reset_address <= 0;
         x <= p1[14:7];
         y <= p1[6:0];
         colour <= 3'b001;
@@ -477,7 +478,7 @@ module control(
   input done_numbers;
 
   output game_started;
-  assign game_started = current_state != START && current_state != END;
+  assign game_started = current_state != START && current_state != CLEAR_BOARD && current_state != CLEAR_WAIT && current_state != CLEAR_INCREMENT;
 
   reg [4:0] current_state, next_state;
 
@@ -497,12 +498,20 @@ module control(
               INC_NUMBER_POS   = 5'd13,
               DEC_PIXEL        = 5'd14,
               END              = 5'd15,
-				  RESET_WAIT 		 = 5'd16;
+				  RESET_WAIT 		 = 5'd16,
+				  CLEAR_BOARD		 = 5'd17,
+				  CLEAR_WAIT 		 = 5'd18,
+				  CLEAR_INCREMENT  = 5'd19;
 
   always@(*)
   begin: state_table
     case (current_state)
-      START : next_state = space_pressed ? DRAW_P1 : START;
+      START : next_state = space_pressed ? CLEAR_BOARD : START;
+		
+		CLEAR_BOARD : next_state = CLEAR_WAIT;
+		CLEAR_WAIT : next_state = done_waiting ? CLEAR_INCREMENT : CLEAR_WAIT;
+		CLEAR_INCREMENT : next_state = done ? DRAW_P1 : CLEAR_BOARD;
+		
       DRAW_P1 : next_state = DRAW_P2;
       DRAW_P2 : next_state = DRAW_P3;
       DRAW_P3 : next_state = DRAW_P4;
@@ -546,6 +555,11 @@ module control(
     decrement_pixel = 0;
 
     case (current_state)
+	 
+	   CLEAR_BOARD : reset_state = 1;
+		CLEAR_WAIT : reset_wait_state = 1;
+      CLEAR_INCREMENT : reset_inc_state = 1;
+	 
       DRAW_P1 : ld_p1 = 1;
 		DRAW_P2 : ld_p2 = 1;
       DRAW_P3 : ld_p3 = 1;
