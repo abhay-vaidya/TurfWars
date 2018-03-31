@@ -386,8 +386,8 @@ module RateDivider(CLOCK_50, clock25, clonke, timer);
   //assign counter = 28'b0000000000000000000000000000;
   initial
 	begin // 10hz
-		load1 = 28'd1249999;//28'd12499999;
-		load2 = 28'd37499999;
+		load1 = 28'd1249999;
+		load2 = 28'd1000000;//28'd37499999;
 		load3 = 28'd3;
 	end
   always@(posedge CLOCK_50)

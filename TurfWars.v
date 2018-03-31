@@ -38,7 +38,7 @@ module DE2Tron(
 	hex_display h3(ordered_colours[11:9], HEX3[6:0]);
 	hex_display h2(ordered_colours[8:6], HEX2[6:0]);
 	hex_display h1(ordered_colours[5:3], HEX1[6:0]);
-	hex_display h0(game_started, HEX0[6:0]);
+	hex_display h0(space_pressed, HEX0[6:0]);
 
 	input PS2_KBCLK, PS2_KBDAT;
 	input           CLOCK_50;    //    50 MHz
@@ -160,10 +160,12 @@ module DE2Tron(
   .ld_p4(ld_p4),
  .reset_state(reset_state),
  .reset_inc_state(reset_inc_state),
+ .reset_wait_state(reset_wait_state),
  .ld_timer(ld_timer),
  .done(done),
  .game_started(game_started),
  .done_ordering(done_ordering),
+ .done_waiting(done_waiting),
 
  .ld_one(ld_one),
  .ld_two(ld_two),
@@ -174,9 +176,9 @@ module DE2Tron(
  .inc_number_positions(inc_number_positions)
   );
 
-wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, done;
+wire ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, done, reset_wait_state;
 
-wire ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers;
+wire ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers, done_waiting;
 
 datapath dp(
   .CLOCK_50(CLOCK_50),
@@ -189,6 +191,8 @@ datapath dp(
  .ld_timer(ld_timer),
  .reset_state(reset_state),
  .reset_inc_state(reset_inc_state),
+ .reset_wait_state(reset_wait_state),
+ .done_waiting(done_waiting),
   .p1(p1[14:0]),
   .p2(p2[14:0]),
   .p3(p3[14:0]),
@@ -278,11 +282,11 @@ endmodule
 
 module datapath(
   CLOCK_50, clonke, timer,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, reset_wait_state,
   p1, p2, p3, p4,
   x, y,
   colour, running,
-  ordered_colours, done, game_started,
+  ordered_colours, done, game_started, done_waiting,
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
@@ -291,7 +295,7 @@ module datapath(
 
   input [11:0] ordered_colours;
   input CLOCK_50, clonke, timer, game_started;
-  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
+  input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, reset_wait_state;
 
   input [14:0] p1, p2, p3, p4; // location information for players
 
@@ -299,6 +303,9 @@ module datapath(
   output reg [6:0] y;
 
   reg [14:0] reset_address = 0;
+  reg [27:0] reset_counter;
+  output done_waiting;
+  assign done_waiting = reset_counter == 0;
 
   output reg [2:0] colour;
   output reg running = 1;
@@ -357,13 +364,19 @@ module datapath(
     end
   else if (reset_state)
     begin
+		reset_counter <= 28'd7999;
       colour <= 3'b000;
       x <= reset_address[14:7];
       y <= reset_address[6:0];
     end
+	 
+  else if (reset_wait_state)
+    begin
+		reset_counter <= reset_counter - 1'b1;
+	 end
+	 
   else if (reset_inc_state)
     begin
-
     reset_address <= reset_address + 1'b1;
     end
 
@@ -450,21 +463,21 @@ endmodule
 
 module control(
   CLOCK_50, space_pressed,
-  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state,
+  ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, reset_wait_state, done_waiting,
   running, done, game_started, done_ordering,
 
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
-  input CLOCK_50, running, done, space_pressed, done_ordering;
-  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
+  input CLOCK_50, running, done, space_pressed, done_ordering, done_waiting;
+  output reg ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state, reset_wait_state;
 
 
   output reg ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel;
   input done_numbers;
 
   output game_started;
-  assign game_started = current_state != START;
+  assign game_started = current_state != START && current_state != END;
 
   reg [4:0] current_state, next_state;
 
@@ -483,7 +496,8 @@ module control(
               DRAW_FOUR        = 5'd12,
               INC_NUMBER_POS   = 5'd13,
               DEC_PIXEL        = 5'd14,
-              END              = 5'd15;
+              END              = 5'd15,
+				  RESET_WAIT 		 = 5'd16;
 
   always@(*)
   begin: state_table
@@ -494,7 +508,9 @@ module control(
       DRAW_P3 : next_state = DRAW_P4;
       DRAW_P4 : next_state = DRAW_TIMER;
       DRAW_TIMER : next_state = running ? DRAW_P1 : RESET;
-      RESET : next_state = RESET_INCREMENT;
+		
+      RESET : next_state = RESET_WAIT;
+		RESET_WAIT : next_state = done_waiting ? RESET_INCREMENT : RESET_WAIT;
       RESET_INCREMENT: next_state = done ? DRAW_WINNER_WAIT : RESET;
 
       DRAW_WINNER_WAIT: next_state = done_ordering ? DRAW_ONE : DRAW_WINNER_WAIT;
@@ -519,6 +535,7 @@ module control(
     ld_p4 = 0;
     ld_timer = 0;
     reset_state = 0;
+	 reset_wait_state = 0;
     reset_inc_state = 0;
 
     ld_one = 0;
@@ -535,8 +552,9 @@ module control(
       DRAW_P4 : ld_p4 = 1;
 
       DRAW_TIMER : ld_timer = 1;
+		
       RESET : reset_state = 1;
-
+		RESET_WAIT : reset_wait_state = 1;
       RESET_INCREMENT : reset_inc_state = 1;
 
       DRAW_ONE : ld_one = 1;
