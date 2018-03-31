@@ -2,9 +2,9 @@
 #### Harsh Patel, Rahul Saini, Chintan Shah, Abhay Vaidya
 ##### CSCB58: Winter 2018 Final Project
 
-###### Note: This project was worked on in a "pair programming" environment on one main computer, thus the commit history does not reflect the contributions. 
+###### Note: This project was worked on in a "pair programming" environment on one main computer, thus the commit history does not accurately reflect individual contributions.
 
-Inspired by the hit Nintendo game _"Splatoon"_, we aimed to recreate its most popular game mode where players compete to cover the play area with their colour. In our version of _Splatoon's Turf Wars_, we start each of the four players at the corners of the screen, moving in different directions.
+Inspired by the hit Nintendo game _"Splatoon"_, we aimed to recreate its most popular game mode where players compete to cover the play area with their designated colour. In our four-player version of _Splatoon's Turf Wars_, we start each player at a different corner of the screen in different directions. There is a white bar at the bottom indicating the time remaining. Once the time runs out, the game will end and the players will be presented with a screen that displays the rankings.
 
 ## Controls
 * Player 1 (Blue): <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
@@ -24,4 +24,4 @@ Inspired by the hit Nintendo game _"Splatoon"_, we aimed to recreate its most po
    
 2. Link: http://www.eecg.utoronto.ca/~jayar/ece241_08F/vga/vga-bmp2mif.html
 
-   Description: Used to convert our bitmap images to .mif files to use as the background for our game's start screen
+   Description: Used to convert our bitmap images to .mif files to use as the background for our game's start screen.
