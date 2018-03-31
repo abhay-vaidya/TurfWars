@@ -207,7 +207,7 @@ module update_ram(
   ram_output,
   p1, p2, p3, p4,
   p1_count, p2_count, p3_count, p4_count,
-  winner
+  ordered_colours
   );
 
   input clock25, running;
@@ -223,7 +223,7 @@ module update_ram(
 
   output reg [14:0] p1_count, p2_count, p3_count, p4_count;
 
-  output reg [1:0] winner;
+  output reg [11:0] ordered_colours;
 
   reg [2:0] curr;
 
@@ -308,22 +308,54 @@ module update_ram(
             endcase
           end
         WINNER : begin
-            if (p1_count >= p2_count)
-              if (p1_count >= p3_count)
-                if (p1_count >= p4_count)
-                  winner <= 2'b00; // p1
-            if (p2_count >= p1_count)
-              if (p2_count >= p3_count)
-                if (p2_count >= p4_count)
-                  winner <= 2'b01;
-            if (p3_count >= p1_count)
-              if (p3_count >= p2_count)
-                if (p3_count >= p4_count)
-                  winner <= 2'b10;
-            if (p4_count >= p1_count)
-              if (p4_count >= p2_count)
-                if (p4_count >= p3_count)
-                  winner <= 2'b11;
+            if (p1_count >= p2_count && p2_count >= p3_count && p3_count >= p4_count)
+              ordered_colours <= 12'b001_010_100_110;
+            else if (p1_count >= p2_count && p2_count >= p4_count && p4_count >= p3_count)
+              ordered_colours <= 12'b001_010_110_100;
+            else if (p1_count >= p3_count && p3_count >= p2_count && p2_count >= p4_count)
+              ordered_colours <= 12'b001_100_010_110;
+            else if (p1_count >= p3_count && p3_count >= p4_count && p4_count >= p2_count)
+              ordered_colours <= 12'b001_100_110_010;
+            else if (p1_count >= p4_count && p4_count >= p2_count && p2_count >= p3_count)
+              ordered_colours <= 12'b001_110_010_100;
+            else if (p1_count >= p4_count && p4_count >= p3_count && p3_count >= p2_count)
+              ordered_colours <= 12'b001_110_100_010;
+            else if (p2_count >= p1_count && p1_count >= p4_count && p4_count >= p3_count)
+              ordered_colours <= 12'b010_001_110_100;
+            else if (p2_count >= p1_count && p1_count >= p3_count && p3_count >= p4_count)
+              ordered_colours <= 12'b010_001_100_110;
+            else if (p2_count >= p3_count && p3_count >= p4_count && p4_count >= p1_count)
+              ordered_colours <= 12'b010_100_110_001;
+            else if (p2_count >= p3_count && p3_count >= p1_count && p1_count >= p4_count)
+              ordered_colours <= 12'b010_100_001_110;
+            else if (p2_count >= p4_count && p4_count >= p3_count && p3_count >= p1_count)
+              ordered_colours <= 12'b010_110_100_001;
+            else if (p2_count >= p4_count && p4_count >= p1_count && p1_count >= p3_count)
+              ordered_colours <= 12'b010_110_001_100;
+            else if (p3_count >= p1_count && p1_count >= p2_count && p2_count >= p4_count)
+              ordered_colours <= 12'b100_001_010_110;
+            else if (p3_count >= p1_count && p1_count >= p4_count && p4_count >= p2_count)
+              ordered_colours <= 12'b100_001_110_010;
+            else if (p3_count >= p2_count && p2_count >= p1_count && p1_count >= p4_count)
+              ordered_colours <= 12'b100_010_001_110;
+            else if (p3_count >= p2_count && p2_count >= p4_count && p4_count >= p1_count)
+              ordered_colours <= 12'b100_010_110_001;
+            else if (p3_count >= p4_count && p4_count >= p1_count && p1_count >= p2_count)
+              ordered_colours <= 12'b100_110_001_010;
+            else if (p3_count >= p4_count && p4_count >= p2_count && p2_count >= p1_count)
+              ordered_colours <= 12'b100_110_010_001;
+            else if (p4_count >= p1_count && p1_count >= p3_count && p3_count >= p2_count)
+              ordered_colours <= 12'b110_001_100_010;
+            else if (p4_count >= p1_count && p1_count >= p2_count && p2_count >= p3_count)
+              ordered_colours <= 12'b110_001_010_100;
+            else if (p4_count >= p2_count && p2_count >= p3_count && p3_count >= p1_count)
+              ordered_colours <= 12'b110_010_100_001;
+            else if (p4_count >= p2_count && p2_count >= p1_count && p1_count >= p3_count)
+              ordered_colours <= 12'b110_010_001_100;
+            else if (p4_count >= p3_count && p3_count >= p2_count && p2_count >= p1_count)
+              ordered_colours <= 12'b110_100_010_001;
+            else
+              ordered_colours <= 12'b110_100_001_010;
           end
         //END : begin
           //end

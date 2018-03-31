@@ -107,7 +107,7 @@ module DE2Tron(
 		.q(out)
 	  );
 
-	wire [1:0] winner;
+	wire [11:0] ordered_colours;
 	wire [14:0] p1_count, p2_count, p3_count, p4_count;
 	wire running;
 	//assign running = SW[0];
@@ -128,7 +128,7 @@ module DE2Tron(
 		.p2_count(p2_count),
 		.p3_count(p3_count),
 		.p4_count(p4_count),
-		.winner(winner)
+		.ordered_colours(ordered_colours)
 		);
 
 
@@ -189,7 +189,7 @@ datapath dp(
   .y(y),
   .colour(colour),
  .running(running),
- .winner(winner),
+ .ordered_colours(ordered_colours),
  .done(done),
 
  .ld_one(ld_one),
@@ -273,14 +273,14 @@ module datapath(
   p1, p2, p3, p4,
   x, y,
   colour, running,
-  winner, done,
+  ordered_colours, done,
   ld_one, ld_two, ld_three, ld_four, inc_number_positions, decrement_pixel, done_numbers
   );
 
   output done;
   assign done = reset_address > 15'b10011111_1111111;
 
-  input [1:0] winner;
+  input [11:0] ordered_colours;
   input CLOCK_50, clonke, timer;
   input ld_p1, ld_p2, ld_p3, ld_p4, ld_timer, reset_state, reset_inc_state;
 
@@ -365,7 +365,7 @@ module datapath(
       if (one[pixel] == 0)
         colour <= 3'b000;
       else
-        colour <= 3'b111;
+        colour <= ordered_colours[11:9];
     end
   else if (ld_two)
     begin
@@ -374,7 +374,7 @@ module datapath(
       if (two[pixel] == 0)
         colour <= 3'b000;
       else
-        colour <= 3'b111;
+        colour <= ordered_colours[8:6];
     end
   else if (ld_three)
     begin
@@ -383,7 +383,7 @@ module datapath(
       if (three[pixel] == 0)
         colour <= 3'b000;
       else
-        colour <= 3'b111;
+        colour <= ordered_colours[5:3];
     end
   else if (ld_four)
     begin
@@ -392,7 +392,7 @@ module datapath(
       if (four[pixel] == 0)
         colour <= 3'b000;
       else
-        colour <= 3'b111;
+        colour <= ordered_colours[2:0];
     end
 
   else if (inc_number_positions)
