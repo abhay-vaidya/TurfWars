@@ -79,140 +79,140 @@ module move(
 
   // initialize players into the 4 corners of the screen
   initial begin
-	  p1 <= 15'b10011101_1110110;
-	  p2 <= 15'b00000001_0000010;
-	  p3 <= 15'b10011101_0000010;
-	  p4 <= 15'b00000001_1110110;
+    p1 <= 15'b10011101_1110110;
+    p2 <= 15'b00000001_0000010;
+    p3 <= 15'b10011101_0000010;
+    p4 <= 15'b00000001_1110110;
   end
 
   // Increment the player addresses based on their current direction and loop
   // players back around if they go over the borders of the game
-	always@(posedge clonke)
-	  begin
-		if(running && game_started)
-			begin
-			case(p1d)
-			  2'b00:
-					begin
-						if(p1[6:0] == 7'b0000010)
-							p1[6:0] <= 7'b1110110;
-						else
-							p1[6:0] <= p1[6:0] - 1'b1;
-					end
-			  2'b01:
-					begin
-						if(p1[6:0] == 7'b1110110)
-							p1[6:0] <= 7'b0000010;
-						else
-							p1[6:0] <= p1[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin
-						if(p1[14:7] == 8'b00000001)
-							p1[14:7] <= 8'b10011101;
-						else
-							p1[14:7] <= p1[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin
-						if(p1[14:7] == 8'b10011101)
-							p1[14:7] <= 8'b00000001;
-						else
-							p1[14:7] <= p1[14:7] + 1'b1;
-					end
-			endcase
-			case(p2d)
-			  2'b00:
-					begin
-						if(p2[6:0] == 7'b0000010)
-							p2[6:0] <= 7'b1110110;
-						else
-							p2[6:0] <= p2[6:0] - 1'b1;
-					end
-			  2'b01:
-					begin
-						if(p2[6:0] == 7'b1110110)
-							p2[6:0] <= 7'b0000010;
-						else
-							p2[6:0] <= p2[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin
-						if(p2[14:7] == 8'b00000001)
-							p2[14:7] <= 8'b10011101;
-						else
-							p2[14:7] <= p2[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin
-						if(p2[14:7] == 8'b10011101)
-							p2[14:7] <= 8'b00000001;
-						else
-							p2[14:7] <= p2[14:7] + 1'b1;
-					end
-			endcase
-			case(p3d)
-			  2'b00:
-					begin
-						if(p3[6:0] == 7'b0000010)
-							p3[6:0] <= 7'b1110110;
-						else
-							p3[6:0] <= p3[6:0] - 1'b1;
-					end
-			  2'b01:
-					begin
-						if(p3[6:0] == 7'b1110110)
-							p3[6:0] <= 7'b0000010;
-						else
-							p3[6:0] <= p3[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin
-						if(p3[14:7] == 8'b00000001)
-							p3[14:7] <= 8'b10011101;
-						else
-							p3[14:7] <= p3[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin
-						if(p3[14:7] == 8'b10011101)
-							p3[14:7] <= 8'b00000001;
-						else
-							p3[14:7] <= p3[14:7] + 1'b1;
-					end
-			endcase
-			case(p4d)
-			  2'b00:
-					begin
-						if(p4[6:0] == 7'b0000010)
-							p4[6:0] <= 7'b1110110;
-						else
-							p4[6:0] <= p4[6:0] - 1'b1;
-					end
-			  2'b01:
-					begin
-						if(p4[6:0] == 7'b1110110)
-							p4[6:0] <= 7'b0000010;
-						else
-							p4[6:0] <= p4[6:0] + 1'b1;
-					end
-			  2'b10:
-					begin
-						if(p4[14:7] == 8'b00000001)
-							p4[14:7] <= 8'b10011101;
-						else
-							p4[14:7] <= p4[14:7] - 1'b1;
-					end
-			  2'b11:
-					begin
-						if(p4[14:7] == 8'b10011101)
-							p4[14:7] <= 8'b00000001;
-						else
-							p4[14:7] <= p4[14:7] + 1'b1;
-					end
-			endcase
-		  end
-	  end
+  always@(posedge clonke)
+    begin
+    if(running && game_started)
+      begin
+      case(p1d)
+        2'b00:
+          begin
+            if(p1[6:0] == 7'b0000010)
+              p1[6:0] <= 7'b1110110;
+            else
+              p1[6:0] <= p1[6:0] - 1'b1;
+          end
+        2'b01:
+          begin
+            if(p1[6:0] == 7'b1110110)
+              p1[6:0] <= 7'b0000010;
+            else
+              p1[6:0] <= p1[6:0] + 1'b1;
+          end
+        2'b10:
+          begin
+            if(p1[14:7] == 8'b00000001)
+              p1[14:7] <= 8'b10011101;
+            else
+              p1[14:7] <= p1[14:7] - 1'b1;
+          end
+        2'b11:
+          begin
+            if(p1[14:7] == 8'b10011101)
+              p1[14:7] <= 8'b00000001;
+            else
+              p1[14:7] <= p1[14:7] + 1'b1;
+          end
+      endcase
+      case(p2d)
+        2'b00:
+          begin
+            if(p2[6:0] == 7'b0000010)
+              p2[6:0] <= 7'b1110110;
+            else
+              p2[6:0] <= p2[6:0] - 1'b1;
+          end
+        2'b01:
+          begin
+            if(p2[6:0] == 7'b1110110)
+              p2[6:0] <= 7'b0000010;
+            else
+              p2[6:0] <= p2[6:0] + 1'b1;
+          end
+        2'b10:
+          begin
+            if(p2[14:7] == 8'b00000001)
+              p2[14:7] <= 8'b10011101;
+            else
+              p2[14:7] <= p2[14:7] - 1'b1;
+          end
+        2'b11:
+          begin
+            if(p2[14:7] == 8'b10011101)
+              p2[14:7] <= 8'b00000001;
+            else
+              p2[14:7] <= p2[14:7] + 1'b1;
+          end
+      endcase
+      case(p3d)
+        2'b00:
+          begin
+            if(p3[6:0] == 7'b0000010)
+              p3[6:0] <= 7'b1110110;
+            else
+              p3[6:0] <= p3[6:0] - 1'b1;
+          end
+        2'b01:
+          begin
+            if(p3[6:0] == 7'b1110110)
+              p3[6:0] <= 7'b0000010;
+            else
+              p3[6:0] <= p3[6:0] + 1'b1;
+          end
+        2'b10:
+          begin
+            if(p3[14:7] == 8'b00000001)
+              p3[14:7] <= 8'b10011101;
+            else
+              p3[14:7] <= p3[14:7] - 1'b1;
+          end
+        2'b11:
+          begin
+            if(p3[14:7] == 8'b10011101)
+              p3[14:7] <= 8'b00000001;
+            else
+              p3[14:7] <= p3[14:7] + 1'b1;
+          end
+      endcase
+      case(p4d)
+        2'b00:
+          begin
+            if(p4[6:0] == 7'b0000010)
+              p4[6:0] <= 7'b1110110;
+            else
+              p4[6:0] <= p4[6:0] - 1'b1;
+          end
+        2'b01:
+          begin
+            if(p4[6:0] == 7'b1110110)
+              p4[6:0] <= 7'b0000010;
+            else
+              p4[6:0] <= p4[6:0] + 1'b1;
+          end
+        2'b10:
+          begin
+            if(p4[14:7] == 8'b00000001)
+              p4[14:7] <= 8'b10011101;
+            else
+              p4[14:7] <= p4[14:7] - 1'b1;
+          end
+        2'b11:
+          begin
+            if(p4[14:7] == 8'b10011101)
+              p4[14:7] <= 8'b00000001;
+            else
+              p4[14:7] <= p4[14:7] + 1'b1;
+          end
+      endcase
+      end
+    end
 
 endmodule
 
@@ -266,7 +266,7 @@ module update_ram(
   output reg done_ordering;
 
   initial begin
-	done_ordering <= 1'b0;
+  done_ordering <= 1'b0;
   end
 
   reg [2:0] curr;
@@ -343,7 +343,7 @@ module update_ram(
             endcase
           end
         WINNER : begin
-        	  done_ordering <= 1'b1;
+            done_ordering <= 1'b1;
             // Script generated text with all permutations of "1234"
             if (p1_count >= p2_count && p2_count >= p3_count && p3_count >= p4_count)
               ordered_colours <= 12'b001_010_100_110;
@@ -415,25 +415,25 @@ module RateDivider(CLOCK_50, clock25, clonke, timer);
   reg [27:0] counter1, counter2, counter3;
 
   initial
-  	begin
-  		load1 = 28'd1249999;
-  		load2 = 28'd37499997;
-  		load3 = 28'd3;
-  	end
+    begin
+      load1 = 28'd1249999;
+      load2 = 28'd37499997;
+      load3 = 28'd3;
+    end
   always@(posedge CLOCK_50)
     begin
       if (counter1 == 0)
         counter1 <= load1;
       else
         counter1 <= counter1 - 1'b1;
-	   if (counter2 == 0)
-			counter2 <= load2;
-		else
-			counter2 <= counter2 - 1'b1;
-	   if (counter3 == 0)
-			counter3 <= load3;
-		else
-			counter3 <= counter3 - 1'b1;
+     if (counter2 == 0)
+      counter2 <= load2;
+    else
+      counter2 <= counter2 - 1'b1;
+     if (counter3 == 0)
+      counter3 <= load3;
+    else
+      counter3 <= counter3 - 1'b1;
     end
 
   assign clonke = (counter1 == 0) ? 1 : 0;

@@ -8,7 +8,7 @@
 
 module TurfWars(
   CLOCK_50,    // On Board 50 MHz
-	PS2_KBCLK, PS2_KBDAT,
+  PS2_KBCLK, PS2_KBDAT,
 
   VGA_CLK,
   VGA_HS, VGA_VS,
@@ -22,17 +22,17 @@ module TurfWars(
   */
 
 
-	input PS2_KBCLK, PS2_KBDAT;
-	input CLOCK_50;
+  input PS2_KBCLK, PS2_KBDAT;
+  input CLOCK_50;
 
-	output             VGA_CLK;       //    VGA Clock
-	output             VGA_HS;        //    VGA H_SYNC
-	output             VGA_VS;        //    VGA V_SYNC
-	output             VGA_BLANK_N;   //    VGA BLANK
-	output             VGA_SYNC_N;    //    VGA SYNC
-	output    [9:0]    VGA_R;         //    VGA Red[9:0]
-	output    [9:0]    VGA_G;         //    VGA Green[9:0]
-	output    [9:0]    VGA_B;         //    VGA Blue[9:0]
+  output             VGA_CLK;       //    VGA Clock
+  output             VGA_HS;        //    VGA H_SYNC
+  output             VGA_VS;        //    VGA V_SYNC
+  output             VGA_BLANK_N;   //    VGA BLANK
+  output             VGA_SYNC_N;    //    VGA SYNC
+  output    [9:0]    VGA_R;         //    VGA Red[9:0]
+  output    [9:0]    VGA_G;         //    VGA Green[9:0]
+  output    [9:0]    VGA_B;         //    VGA Blue[9:0]
 
 
   // instantiate the keyboard module for keyboard input
@@ -50,70 +50,70 @@ module TurfWars(
   wire [4:0] KEY_PRESSED;
   wire clock25, clonke, timer;
 
-	RateDivider div(CLOCK_50, clock25, clonke, timer);
+  RateDivider div(CLOCK_50, clock25, clonke, timer);
 
-	wire [14:0] p1, p2, p3, p4;
+  wire [14:0] p1, p2, p3, p4;
 
-	move m(
-	  .clonke(clonke),
-	 	.running(running),
-		.game_started(game_started),
-		.p1d(p1d),
-		.p2d(p2d),
-		.p3d(p3d),
-		.p4d(p4d),
-	  .p1(p1),
-	  .p2(p2),
-	  .p3(p3),
-	  .p4(p4)
-	);
+  move m(
+    .clonke(clonke),
+     .running(running),
+    .game_started(game_started),
+    .p1d(p1d),
+    .p2d(p2d),
+    .p3d(p3d),
+    .p4d(p4d),
+    .p1(p1),
+    .p2(p2),
+    .p3(p3),
+    .p4(p4)
+  );
 
-	wire [2:0] p1d, p2d, p3d, p4d;
+  wire [2:0] p1d, p2d, p3d, p4d;
 
-	directions d(
-	.CLOCK_50(CLOCK_50),
-	  .KEY_PRESSED(KEY_PRESSED),
-	  .p1d(p1d),
-	  .p2d(p2d),
-	  .p3d(p3d),
-	  .p4d(p4d)
-	);
+  directions d(
+  .CLOCK_50(CLOCK_50),
+    .KEY_PRESSED(KEY_PRESSED),
+    .p1d(p1d),
+    .p2d(p2d),
+    .p3d(p3d),
+    .p4d(p4d)
+  );
 
-	wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
-	wire [14:0] address;//, address1; // 15 bits, 8 X bits, 7 Y bits
-	wire [2:0] out; // data in the ram at the given address (3 bits)
-	wire [2:0] data; // data to be written (3 bits)
+  wire wren; // 1 : write data to the ram, 0 : don't write data to the ram
+  wire [14:0] address;//, address1; // 15 bits, 8 X bits, 7 Y bits
+  wire [2:0] out; // data in the ram at the given address (3 bits)
+  wire [2:0] data; // data to be written (3 bits)
 
-	ram32768x3 ram(
-	  .address(address),
-		.clock(CLOCK_50),
-		.data(data),
-		.wren(wren),
-		.q(out)
-	);
+  ram32768x3 ram(
+    .address(address),
+    .clock(CLOCK_50),
+    .data(data),
+    .wren(wren),
+    .q(out)
+  );
 
-	wire [11:0] ordered_colours;
-	wire [14:0] p1_count, p2_count, p3_count, p4_count;
-	wire running, game_started, done_ordering;
+  wire [11:0] ordered_colours;
+  wire [14:0] p1_count, p2_count, p3_count, p4_count;
+  wire running, game_started, done_ordering;
 
-	update_ram update(
-		.clock25(clock25),
-		.running(running),
-		.address(address),
-		.wren(wren),
-		.data_to_ram(data),
-		.ram_output(out),
-		.p1(p1),
-		.p2(p2),
-		.p3(p3),
-		.p4(p4),
-		.p1_count(p1_count),
-		.p2_count(p2_count),
-		.p3_count(p3_count),
-		.p4_count(p4_count),
+  update_ram update(
+    .clock25(clock25),
+    .running(running),
+    .address(address),
+    .wren(wren),
+    .data_to_ram(data),
+    .ram_output(out),
+    .p1(p1),
+    .p2(p2),
+    .p3(p3),
+    .p4(p4),
+    .p1_count(p1_count),
+    .p2_count(p2_count),
+    .p3_count(p3_count),
+    .p4_count(p4_count),
     .done_ordering(done_ordering),
-		.ordered_colours(ordered_colours)
-	);
+    .ordered_colours(ordered_colours)
+  );
 
   // Main game running modules below
 
@@ -295,21 +295,21 @@ module datapath(
   always@(posedge CLOCK_50)
     begin
       if (increment_bars)
-      	bars_address <= bars_address - 1'b1;
+        bars_address <= bars_address - 1'b1;
       if (wait_bars)
         bar_counter <= bar_counter - 1'b1;
       if (draw_bars)
         begin
-        	bar_counter <= 28'd5999;
-        	y <= bars_address[14:8];
-        	x <= bars_address[7:0];
-        	if (x >= 8'b00011100 && x <= 8'b00101011 && y >= 7'b0011110 ||
+          bar_counter <= 28'd5999;
+          y <= bars_address[14:8];
+          x <= bars_address[7:0];
+          if (x >= 8'b00011100 && x <= 8'b00101011 && y >= 7'b0011110 ||
               x >= 8'b00111010 && x <= 8'b01001001 && y >= 7'b0101010 ||
               x >= 8'b01011000 && x <= 8'b01100111 && y >= 7'b0110110 ||
               x >= 8'b01110110 && x <= 8'b10000101 && y >= 7'b1000010)
-        		colour <= 3'b000;
-        	else
-        		colour <= 3'b111;
+            colour <= 3'b000;
+          else
+            colour <= 3'b111;
         end
       if (ld_p1)
         begin
@@ -346,14 +346,14 @@ module datapath(
         begin
         x <= reset_address[14:7];
         y <= reset_address[6:0];
-    		reset_counter <= 28'd6999;
-    		if (starting)
-    			colour <= 3'b000;
+        reset_counter <= 28'd6999;
+        if (starting)
+          colour <= 3'b000;
         else
-    			colour <= 3'b111;
+          colour <= 3'b111;
         end
       else if (reset_wait_state)
-    		reset_counter <= reset_counter - 1'b1;
+        reset_counter <= reset_counter - 1'b1;
       else if (reset_inc_state)
         reset_address <= reset_address + 1'b1;
       else if (ld_one)
@@ -394,7 +394,7 @@ module datapath(
         end
       else if (inc_number_positions)
         begin
-      		done_numbers <= pixel == 6'd0;
+          done_numbers <= pixel == 6'd0;
             if (pixel == 6'd30 || pixel == 6'd25 || pixel == 6'd20 ||
                 pixel == 6'd15 || pixel == 6'd10 || pixel == 6'd5)
               begin
@@ -417,7 +417,7 @@ module datapath(
         end
       else if (decrement_pixel)
         pixel = pixel - 1'b1;
-  	end
+    end
 
   // Game timer incrementor
   always@(posedge timer)
@@ -490,13 +490,13 @@ module control(
               INC_NUMBER_POS   = 5'd13,
               DEC_PIXEL        = 5'd14,
               END              = 5'd15,
-    				  RESET_WAIT 		   = 5'd16,
-    				  CLEAR_BOARD		   = 5'd17,
-    				  CLEAR_WAIT 		   = 5'd18,
-    				  CLEAR_INCREMENT  = 5'd19,
-    				  DRAW_BAR_1 		   = 5'd20,
-    				  BAR_INCREMENT    = 5'd21,
-    				  BAR_WAIT			   = 5'd22;
+              RESET_WAIT        = 5'd16,
+              CLEAR_BOARD       = 5'd17,
+              CLEAR_WAIT        = 5'd18,
+              CLEAR_INCREMENT  = 5'd19,
+              DRAW_BAR_1        = 5'd20,
+              BAR_INCREMENT    = 5'd21,
+              BAR_WAIT         = 5'd22;
 
   // Main FSM
   always@(*)
@@ -506,9 +506,9 @@ module control(
       START : next_state = space_pressed ? CLEAR_BOARD : START;
 
       // Clear the board when space bar pressed
-  		CLEAR_BOARD : next_state = CLEAR_WAIT;
-  		CLEAR_WAIT : next_state = done_waiting ? CLEAR_INCREMENT : CLEAR_WAIT;
-  		CLEAR_INCREMENT : next_state = done ? DRAW_P1 : CLEAR_BOARD;
+      CLEAR_BOARD : next_state = CLEAR_WAIT;
+      CLEAR_WAIT : next_state = done_waiting ? CLEAR_INCREMENT : CLEAR_WAIT;
+      CLEAR_INCREMENT : next_state = done ? DRAW_P1 : CLEAR_BOARD;
 
       // Draw all the players
       DRAW_P1 : next_state = DRAW_P2;
@@ -521,7 +521,7 @@ module control(
 
       // Clear the board when game finishes
       RESET : next_state = RESET_WAIT;
-		  RESET_WAIT : next_state = done_waiting ? RESET_INCREMENT : RESET_WAIT;
+      RESET_WAIT : next_state = done_waiting ? RESET_INCREMENT : RESET_WAIT;
       RESET_INCREMENT: next_state = done ? DRAW_WINNER_WAIT : RESET;
 
       // Wait for RAM to be completely read and calculate player order
@@ -529,9 +529,9 @@ module control(
         next_state = done_ordering ? DRAW_BAR_1 : DRAW_WINNER_WAIT;
 
       // Draw the bars indicating highest to lowest ranking
-  		DRAW_BAR_1 : next_state = BAR_WAIT;
-  		BAR_WAIT : next_state = done_bar_wait ? BAR_INCREMENT : BAR_WAIT;
-  		BAR_INCREMENT : next_state = done_bars ? DRAW_ONE : DRAW_BAR_1;
+      DRAW_BAR_1 : next_state = BAR_WAIT;
+      BAR_WAIT : next_state = done_bar_wait ? BAR_INCREMENT : BAR_WAIT;
+      BAR_INCREMENT : next_state = done_bars ? DRAW_ONE : DRAW_BAR_1;
 
       // Draw individual numbers onto the bars in order and in the colour
       // of the players in order
