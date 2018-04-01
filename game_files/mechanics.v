@@ -1,9 +1,9 @@
   // Mechanics for the main game
 
 module directions(
-  CLOCK_50,
-  KEY_PRESSED,
-  p1d, p2d, p3d, p4d
+    CLOCK_50,
+    KEY_PRESSED,
+    p1d, p2d, p3d, p4d
   );
 
   input CLOCK_50;
@@ -51,9 +51,9 @@ endmodule
 
 
 module move(
-  clonke, running, game_started,
-  p1d, p2d, p3d, p4d,
-  p1, p2, p3, p4
+    clonke, running, game_started,
+    p1d, p2d, p3d, p4d,
+    p1, p2, p3, p4
   );
 
   /*
@@ -89,48 +89,48 @@ module move(
   // players back around if they go over the borders of the game
   always@(posedge clonke)
     begin
-    if(running && game_started)
-      begin
-        case(p1d)
-          2'b00 : p1[6:0]  <= (p1[6:0]  == 7'b0000010)  ? 7'b1110110  : p1[6:0]  - 1'b1;
-          2'b01 : p1[6:0]  <= (p1[6:0]  == 7'b1110110)  ? 7'b0000010  : p1[6:0]  + 1'b1;
-          2'b10 : p1[14:7] <= (p1[14:7] == 8'b00000001) ? 8'b10011101 : p1[14:7] - 1'b1;
-          2'b11 : p1[14:7] <= (p1[14:7] == 8'b10011101) ? 8'b00000001 : p1[14:7] + 1'b1;
-        endcase
-        case(p2d)
-          2'b00 : p2[6:0]  <= (p2[6:0]  == 7'b0000010)  ? 7'b1110110  : p2[6:0]  - 1'b1;
-          2'b01 : p2[6:0]  <= (p2[6:0]  == 7'b1110110)  ? 7'b0000010  : p2[6:0]  + 1'b1;
-          2'b10 : p2[14:7] <= (p2[14:7] == 8'b00000001) ? 8'b10011101 : p2[14:7] - 1'b1;
-          2'b11 : p2[14:7] <= (p2[14:7] == 8'b10011101) ? 8'b00000001 : p2[14:7] + 1'b1;
-        endcase
-        case(p3d)
-          2'b00 : p3[6:0]  <= (p3[6:0]  == 7'b0000010)  ? 7'b1110110  : p3[6:0]  - 1'b1;
-          2'b01 : p3[6:0]  <= (p3[6:0]  == 7'b1110110)  ? 7'b0000010  : p3[6:0]  + 1'b1;
-          2'b10 : p3[14:7] <= (p3[14:7] == 8'b00000001) ? 8'b10011101 : p3[14:7] - 1'b1;
-          2'b11 : p3[14:7] <= (p3[14:7] == 8'b10011101) ? 8'b00000001 : p3[14:7] + 1'b1;
-        endcase
-        case(p4d)
-          2'b00 : p4[6:0]  <= (p4[6:0]  == 7'b0000010)  ? 7'b1110110  : p4[6:0]  - 1'b1;
-          2'b01 : p4[6:0]  <= (p4[6:0]  == 7'b1110110)  ? 7'b0000010  : p4[6:0]  + 1'b1;
-          2'b10 : p4[14:7] <= (p4[14:7] == 8'b00000001) ? 8'b10011101 : p4[14:7] - 1'b1;
-          2'b11 : p4[14:7] <= (p4[14:7] == 8'b10011101) ? 8'b00000001 : p4[14:7] + 1'b1;
-        endcase
-      end
+      if(running && game_started)
+        begin
+          case(p1d)
+            2'b00 : p1[6:0]  <= (p1[6:0]  == 7'b0000010)  ? 7'b1110110  : p1[6:0]  - 1'b1;
+            2'b01 : p1[6:0]  <= (p1[6:0]  == 7'b1110110)  ? 7'b0000010  : p1[6:0]  + 1'b1;
+            2'b10 : p1[14:7] <= (p1[14:7] == 8'b00000001) ? 8'b10011101 : p1[14:7] - 1'b1;
+            2'b11 : p1[14:7] <= (p1[14:7] == 8'b10011101) ? 8'b00000001 : p1[14:7] + 1'b1;
+          endcase
+          case(p2d)
+            2'b00 : p2[6:0]  <= (p2[6:0]  == 7'b0000010)  ? 7'b1110110  : p2[6:0]  - 1'b1;
+            2'b01 : p2[6:0]  <= (p2[6:0]  == 7'b1110110)  ? 7'b0000010  : p2[6:0]  + 1'b1;
+            2'b10 : p2[14:7] <= (p2[14:7] == 8'b00000001) ? 8'b10011101 : p2[14:7] - 1'b1;
+            2'b11 : p2[14:7] <= (p2[14:7] == 8'b10011101) ? 8'b00000001 : p2[14:7] + 1'b1;
+          endcase
+          case(p3d)
+            2'b00 : p3[6:0]  <= (p3[6:0]  == 7'b0000010)  ? 7'b1110110  : p3[6:0]  - 1'b1;
+            2'b01 : p3[6:0]  <= (p3[6:0]  == 7'b1110110)  ? 7'b0000010  : p3[6:0]  + 1'b1;
+            2'b10 : p3[14:7] <= (p3[14:7] == 8'b00000001) ? 8'b10011101 : p3[14:7] - 1'b1;
+            2'b11 : p3[14:7] <= (p3[14:7] == 8'b10011101) ? 8'b00000001 : p3[14:7] + 1'b1;
+          endcase
+          case(p4d)
+            2'b00 : p4[6:0]  <= (p4[6:0]  == 7'b0000010)  ? 7'b1110110  : p4[6:0]  - 1'b1;
+            2'b01 : p4[6:0]  <= (p4[6:0]  == 7'b1110110)  ? 7'b0000010  : p4[6:0]  + 1'b1;
+            2'b10 : p4[14:7] <= (p4[14:7] == 8'b00000001) ? 8'b10011101 : p4[14:7] - 1'b1;
+            2'b11 : p4[14:7] <= (p4[14:7] == 8'b10011101) ? 8'b00000001 : p4[14:7] + 1'b1;
+          endcase
+        end
     end
 
 endmodule
 
 
 module update_ram(
-  clock25,
-  running,
-  address,
-  wren,
-  data_to_ram,
-  ram_output,
-  p1, p2, p3, p4,
-  p1_count, p2_count, p3_count, p4_count,
-  ordered_colours, done_ordering
+    clock25,
+    running,
+    address,
+    wren,
+    data_to_ram,
+    ram_output,
+    p1, p2, p3, p4,
+    p1_count, p2_count, p3_count, p4_count,
+    ordered_colours, done_ordering
   );
 
   /*
@@ -194,17 +194,17 @@ module update_ram(
   always@(*)
     begin: state_table
       case (current_state)
-      START_WRITE : next_state = running ? WRITE_P1 : START_READ;
-      WRITE_P1 :    next_state = WRITE_P2;
-      WRITE_P2 :    next_state = WRITE_P3;
-      WRITE_P3 :    next_state = WRITE_P4;
-      WRITE_P4 :    next_state = START_WRITE;
-      START_READ :  next_state = READ;
-      READ :        next_state = COUNT;
-      COUNT :       next_state = done ? WINNER : READ;
-      WINNER :      next_state = END;
-      END :         next_state = END;
-      default :     next_state = START_WRITE;
+        START_WRITE : next_state = running ? WRITE_P1 : START_READ;
+        WRITE_P1 :    next_state = WRITE_P2;
+        WRITE_P2 :    next_state = WRITE_P3;
+        WRITE_P3 :    next_state = WRITE_P4;
+        WRITE_P4 :    next_state = START_WRITE;
+        START_READ :  next_state = READ;
+        READ :        next_state = COUNT;
+        COUNT :       next_state = done ? WINNER : READ;
+        WINNER :      next_state = END;
+        END :         next_state = END;
+        default :     next_state = START_WRITE;
       endcase
     end
 
