@@ -321,7 +321,7 @@ module RateDivider(CLOCK_50, clock25, clonke, timer);
   initial
     begin
       load1 = 28'd1249999;
-      load2 = 28'd37499997;
+      load2 = 28'd37499996;
       load3 = 28'd3;
     end
   always@(posedge CLOCK_50)
