@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
 /*
-Code for PS/2 Keyboard input obtained from:
-http://www.instructables.com/id/PS2-Keyboard-for-FPGA/
+  Code for PS/2 Keyboard input obtained from:
+  http://www.instructables.com/id/PS2-Keyboard-for-FPGA/
 
-Edited to fit TurfWars game controls.
+  Edited to fit TurfWars game controls.
 */
 
 module keyboard(

@@ -57,17 +57,19 @@ module move(
   );
 
   /*
-  This module moves the players by updating their addresses.
-  "clonke" is a slower ticking clock used to move the players at an appopriate rate.
+    This module moves the players by updating their addresses.
+    "clonke" is a slower ticking clock used to move the players at an
+    appopriate rate.
 
-  The inputs p1d, p2d .. are the current directions the players are moving.
+    The inputs p1d, p2d .. are the current directions the players are moving.
 
-  The input "running" tells this module whether or not to continue moving the
-  players based on if the game is still going.
+    The input "running" tells this module whether or not to continue moving the
+    players based on if the game is still going.
 
-  The input "game_started" tells this module if the game was started by the players.
+    The input "game_started" tells this module if the game was started by
+    the players.
 
-  The outputs from this module are the current locations of each player.
+    The outputs from this module are the current locations of each player.
   */
 
   input clonke, running, game_started;
@@ -228,22 +230,23 @@ module update_ram(
   );
 
   /*
-  This module handles all communication with the RAM used by the game.
+    This module handles all communication with the RAM used by the game.
 
-  Each address in the RAM equivalent to a pixel on the board, which means the
-  RAM needs to handle up to 120x160 pixels and requires a 15 bit address and
-  stores 3 bits per address, representing the colour of the screen at the pixel.
+    Each address in the RAM equivalent to a pixel on the board, which means the
+    RAM needs to handle up to 120x160 pixels and requires a 15 bit address and
+    stores 3 bits per address, representing the colour of the screen at
+    the pixel.
 
-  During the running phase of the game, the RAM is constantly updated using the
-  current location of each player as the address and each player's colour as the
-  data stored.
+    During the running phase of the game, the RAM is constantly updated
+    using the current location of each player as the address and each player's
+    colour as the data stored.
 
-  Once the game is over, everything stored in the RAM is read and all data from
-  the RAM gets added up into the individual player counts based on the colours
-  stored read from the RAM.
+    Once the game is over, everything stored in the RAM is read and all
+    data from the RAM gets added up into the individual player counts based on
+    the colours stored read from the RAM.
 
-  Once all the colours are counted up, this module returns an ordered list of
-  colours based on how much each player covered.
+    Once all the colours are counted up, this module returns an ordered list of
+    colours based on how much each player covered.
   */
 
   input clock25, running;
