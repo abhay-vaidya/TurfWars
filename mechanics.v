@@ -1,4 +1,3 @@
-
 // Mechanics for the main game
 
 module directions(
@@ -14,13 +13,15 @@ module directions(
   // player directions
   output reg [1:0] p1d, p2d, p3d, p4d;
 
+  // initialize player directions
   initial begin
-    p1d <= 2'b00;
-    p2d <= 2'b01;
-    p3d <= 2'b10;
-    p4d <= 2'b11;
+    p1d <= 2'b00; // p1 starts moving up
+    p2d <= 2'b01; // down
+    p3d <= 2'b10; // left
+    p4d <= 2'b11; // right
   end
 
+  // Update directions based on keyboard input
   always@(posedge CLOCK_50)
     begin
       case (KEY_PRESSED)
@@ -55,11 +56,26 @@ module move(
   p1, p2, p3, p4
   );
 
+  /*
+  This module moves the players by updating their addresses.
+  "clonke" is a slower ticking clock used to move the players at an appopriate rate.
+
+  The inputs p1d, p2d .. are the current directions the players are moving.
+
+  The input "running" tells this module whether or not to continue moving the
+  players based on if the game is still going.
+
+  The input "game_started" tells this module if the game was started by the players.
+
+  The outputs from this module are the current locations of each player.
+  */
+
   input clonke, running, game_started;
   input [1:0] p1d, p2d, p3d, p4d;
 
   output reg [14:0] p1, p2, p3, p4;
 
+  // initialize players into the 4 corners of the screen
   initial begin
 	  p1 <= 15'b10011101_1110110;
 	  p2 <= 15'b00000001_0000010;
@@ -67,7 +83,9 @@ module move(
 	  p4 <= 15'b00000001_1110110;
   end
 
-	  always@(posedge clonke)
+  // Increment the player addresses based on their current direction and loop
+  // players back around if they go over the borders of the game
+	always@(posedge clonke)
 	  begin
 		if(running && game_started)
 			begin
@@ -209,6 +227,25 @@ module update_ram(
   ordered_colours, done_ordering
   );
 
+  /*
+  This module handles all communication with the RAM used by the game.
+
+  Each address in the RAM equivalent to a pixel on the board, which means the
+  RAM needs to handle up to 120x160 pixels and requires a 15 bit address and
+  stores 3 bits per address, representing the colour of the screen at the pixel.
+
+  During the running phase of the game, the RAM is constantly updated using the
+  current location of each player as the address and each player's colour as the
+  data stored.
+
+  Once the game is over, everything stored in the RAM is read and all data from
+  the RAM gets added up into the individual player counts based on the colours
+  stored read from the RAM.
+
+  Once all the colours are counted up, this module returns an ordered list of
+  colours based on how much each player covered.
+  */
+
   input clock25, running;
 
   output reg [14:0] address;
@@ -230,15 +267,6 @@ module update_ram(
   end
 
   reg [2:0] curr;
-
-  /*
-  start_write -> running ? writep1 : start_read
-  writep1 -> writep2 -> writep3 -> writep4 -> start_write
-  start_read (address = 0) -> read -> count
-  count (increments address, counts) -> done ? winner : read
-  winner -> end
-  end -> end
-  */
 
   wire done;
   assign done = address[14:0] > 15'b10011110_1111111;
@@ -273,11 +301,11 @@ module update_ram(
       endcase
     end
 
+  // Using a slower clock as the RAM itself needs CLOCK_50 ticks
+  // to load and store data at specific addresses
   always@(negedge clock25)
     begin
       case (current_state)
-        //START_WRITE : begin
-          //end
         WRITE_P1 : begin
             wren <= 1'b1;
             address[14:0] <= p1[14:0];
@@ -312,6 +340,8 @@ module update_ram(
             endcase
           end
         WINNER : begin
+        	  done_ordering <= 1'b1;
+            // Script generated text with all permutations of "1234"
             if (p1_count >= p2_count && p2_count >= p3_count && p3_count >= p4_count)
               ordered_colours <= 12'b001_010_100_110;
             else if (p1_count >= p2_count && p2_count >= p4_count && p4_count >= p3_count)
@@ -360,11 +390,7 @@ module update_ram(
               ordered_colours <= 12'b110_100_010_001;
             else
               ordered_colours <= 12'b110_100_001_010;
-
-				done_ordering <= 1'b1;
           end
-        //END : begin
-          //end
       endcase
     end
 
@@ -378,18 +404,19 @@ endmodule
 
 module RateDivider(CLOCK_50, clock25, clonke, timer);
 
+  // Basic rate divider module used to obtain slower clocks
+
   input CLOCK_50;
   output clock25, clonke, timer;
   reg [27:0] load1, load2, load3;
   reg [27:0] counter1, counter2, counter3;
 
-  //assign counter = 28'b0000000000000000000000000000;
   initial
-	begin // 10hz
-		load1 = 28'd1249999;
-		load2 = 28'd37499997;
-		load3 = 28'd3;
-	end
+  	begin
+  		load1 = 28'd1249999;
+  		load2 = 28'd37499997;
+  		load3 = 28'd3;
+  	end
   always@(posedge CLOCK_50)
     begin
       if (counter1 == 0)
@@ -406,7 +433,7 @@ module RateDivider(CLOCK_50, clock25, clonke, timer);
 			counter3 <= counter3 - 1'b1;
     end
 
-  assign clonke = (counter1 == 0) ? 1 : 0; //_____|_____|_____
+  assign clonke = (counter1 == 0) ? 1 : 0;
   assign timer = (counter2 == 0) ? 1 : 0;
   assign clock25 = (counter3 == 0) ? 1 : 0;
 
