@@ -1,39 +1,21 @@
 `timescale 1ns / 1ps
 
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer: Montvydas Klumbys
-//
-// Create Date:
-// Design Name:
-// Module Name:    Keyboard
-// Project Name:
-// Target Devices:
-// Tool versions:
-// Description:
-//	A module which is used to receive the DATA from PS2 type keyboard and translate that data into sensible codeword.
-//
-// Dependencies:
-//
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//
-//////////////////////////////////////////////////////////////////////////////////
+/*
+Code for PS/2 Keyboard input obtained from:
+http://www.instructables.com/id/PS2-Keyboard-for-FPGA/
+
+Edited to fit TurfWars game controls.
+*/
 
 module keyboard(
-    input CLOCK_50,	//board clock
-    input PS2_KBCLK,	//keyboard clock and data signals
+    input CLOCK_50,
+    input PS2_KBCLK,
     input PS2_KBDAT,
-//	output reg scan_err,			//These can be used if the Keyboard module is used within a another module
-//	output reg [10:0] scan_code,
-//	output reg [3:0]COUNT,
-//	output reg TRIG_ARR,
-//	output reg [7:0]CODEWORD,
-    output reg [4:0] KEY_PRESSED	//8 LEDs
+    output reg [4:0] KEY_PRESSED
    );
 
-	wire [7:0] ARROW_UP = 8'h75;	//codes for arrows
+  // Specific Key codes
+	wire [7:0] ARROW_UP = 8'h75;
 	wire [7:0] ARROW_DOWN = 8'h72;
 	wire [7:0] ARROW_LEFT = 8'h6B;
 	wire [7:0] ARROW_RIGHT = 8'h74;
@@ -50,9 +32,6 @@ module keyboard(
 	wire [7:0] COLON = 8'h4C;
 	wire [7:0] QUOTES = 8'h52;
 	wire [7:0] SPACE = 8'h29;
-
-	//wire [7:0] EXTENDED = 8'hE0;	//codes
-	//wire [7:0] RELEASED = 8'hF0;
 
 	reg read;				//this is 1 if still waits to receive more bits
 	reg [11:0] count_reading;		//this is used to detect how much time passed since it received the previous codeword
@@ -97,7 +76,6 @@ module keyboard(
 		end
 	end
 
-
 	always @(posedge CLOCK_50) begin
 	if (TRIGGER) begin						//If the down counter (CLK/250) is ready
 		if (PS2_KBCLK != PREVIOUS_STATE) begin			//if the state of Clock pin changed from previous state
@@ -131,7 +109,6 @@ module keyboard(
 	end
 	end
 
-
 	always @(posedge CLOCK_50) begin
 		if (TRIGGER) begin					//if the 250 times slower than board clock triggers
 			if (TRIG_ARR) begin				//and if a full packet of 11 bits was received
@@ -147,14 +124,12 @@ module keyboard(
 		else CODEWORD <= 8'd0;					//no clock trigger, no data…
 	end
 
+  // Controls for TurfWars
 	always @(posedge CLOCK_50) begin
-//	if (TRIGGER) begin
-//		if (TRIG_ARR) begin
-//		LED<=scan_code[8:1];			//You can put the code on the LEDs if you want to, that’s up to you
-		if (CODEWORD == ARROW_UP)				//if the CODEWORD has the same code as the ARROW_UP code
-			KEY_PRESSED <= 5'd0;					//count up the LED register to light up LEDs
-		else if (CODEWORD == ARROW_DOWN)		//or if the ARROW_DOWN was pressed, then
-			KEY_PRESSED <= 5'd1;					//count down LED register
+		if (CODEWORD == ARROW_UP)
+			KEY_PRESSED <= 5'd0;
+		else if (CODEWORD == ARROW_DOWN)
+			KEY_PRESSED <= 5'd1;
 		else if (CODEWORD == ARROW_LEFT)
 			KEY_PRESSED <= 5'd2;
 		else if (CODEWORD == ARROW_RIGHT)
@@ -185,10 +160,6 @@ module keyboard(
 			KEY_PRESSED <= 5'd15;
 		else if (CODEWORD == SPACE)
 			KEY_PRESSED <= 5'd16;
-			//if (CODEWORD == EXTENDED)			//For example you can check here if specific codewords were received
-			//if (CODEWORD == RELEASEDcvcvcvcvcvcvcvcvcvvcvcvcvvc)
-		//end
-//	end
 	end
 
 endmodule
