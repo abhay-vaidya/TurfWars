@@ -344,10 +344,11 @@ module datapath(
         end
       else if (reset_state)
         begin
-        x <= reset_address[14:7];
-        y <= reset_address[6:0];
-        reset_counter <= 28'd6999;
-        colour = starting ? 3'b000 : 3'b111;
+          x <= reset_address[14:7];
+          y <= reset_address[6:0];
+          reset_counter <= 28'd6999;
+          colour = starting ? 3'b000 : 3'b111;
+        end
       else if (reset_wait_state)
         reset_counter <= reset_counter - 1'b1;
       else if (reset_inc_state)
@@ -368,13 +369,13 @@ module datapath(
         begin
           x <= three_address[14:7];
           y <= three_address[6:0];
-          colour = (three[pixel] ==  ? 3'b000 : ordered_colours[5:3];
+          colour = (three[pixel] == 0) ? 3'b000 : ordered_colours[5:3];
         end
       else if (ld_four)
         begin
           x <= four_address[14:7];
           y <= four_address[6:0];
-          colour = (four[pixel] == 0 ? 3'b000 : ordered_colours[2:0];
+          colour = (four[pixel] == 0) ? 3'b000 : ordered_colours[2:0];
         end
       else if (inc_number_positions)
         begin
