@@ -2,9 +2,9 @@
 `include "vga_adapter/vga_address_translator.v"
 `include "vga_adapter/vga_controller.v"
 `include "vga_adapter/vga_pll.v"
-`include "mechanics.v"
-`include "ps2controller.v"
-`include "ram32768x3.v"
+`include "game_files/mechanics.v"
+`include "game_files/ps2controller.v"
+`include "game_files/ram32768x3.v"
 
 module TurfWars(
   CLOCK_50,    // On Board 50 MHz
