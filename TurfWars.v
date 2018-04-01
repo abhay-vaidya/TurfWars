@@ -265,7 +265,7 @@ module datapath(
   reg [7:0] timer_x;
 
   input ld_one, ld_two, ld_three, ld_four;
-  input inc_number_positions, decrement_pixel, starting;;
+  input inc_number_positions, decrement_pixel, starting;
   output reg done_numbers;
 
   reg [5:0] pixel = 6'd34;
