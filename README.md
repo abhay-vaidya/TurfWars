@@ -14,7 +14,7 @@ Inspired by the hit Nintendo game _"Splatoon"_, we aimed to recreate its most po
 
 ## Required Hardware
 - Altera DE2 Board
-   - For pin assignments, use `DE2.qsf` if you are using a Cyclone IV board and `DE2cyclone2.qsf` for Cyclone II
+   - For pin assignments, use `DE2cyclone4.qsf` if you are using a Cyclone IV board and `DE2cyclone2.qsf` for Cyclone II
 - VGA Display
 - PS/2 Keyboard
 
